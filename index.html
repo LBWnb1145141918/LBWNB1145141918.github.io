@@ -217,7 +217,8 @@ a{color:#00ffcc;text-decoration:underline;}
 <div class="scp-item" data-target="scp-1128">SCP-1128 水中巨物</div>
 <div class="scp-item" data-target="scp-252">SCP-252 拟态沧龙</div>
 </div>
-<div class="back-menu" data-target="scp-list">【返回SCP列表】</div>
+<!-- 修复：将 data-target 从 scp-list 改为 main，点击返回主菜单 -->
+<div class="back-menu" data-target="main">【返回主菜单】</div>
 </div>
 
 <!-- ==================== 带等级颜色的SCP档案 ==================== -->
@@ -642,40 +643,50 @@ function playClickSound() {
   });
 }
 
-// 终端菜单切换逻辑
-const allMenuItems = document.querySelectorAll('.menu-item, .back-menu, .scp-item, .recharge-option, .recharge-btn');
-const contentBlocks = document.querySelectorAll('.content-block');
+// 终端菜单切换逻辑（优化兼容性，确保所有按钮都能触发）
+document.addEventListener('DOMContentLoaded', function() {
+    const allMenuItems = document.querySelectorAll('.menu-item, .back-menu, .scp-item, .recharge-option, .recharge-btn');
+    const contentBlocks = document.querySelectorAll('.content-block');
 
-allMenuItems.forEach(item => {
-    item.addEventListener('click', () => {
-        // 播放点击音效
-        playClickSound();
-        
-        document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
-        if (item.classList.contains('menu-item')) item.classList.add('active');
-        const targetId = item.dataset.target;
-        contentBlocks.forEach(block => block.classList.remove('active'));
-        if (targetId) {
-            document.getElementById(targetId).classList.add('active');
-            document.querySelector('.terminal-content').scrollTop = 0;
-        }
+    allMenuItems.forEach(item => {
+        item.addEventListener('click', () => {
+            // 播放点击音效
+            playClickSound();
+            
+            // 移除所有menu-item的active状态
+            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+            // 给当前点击的menu-item添加active（如果是menu-item）
+            if (item.classList.contains('menu-item')) item.classList.add('active');
+            
+            // 获取目标ID并切换内容
+            const targetId = item.dataset.target;
+            if (targetId) {
+                contentBlocks.forEach(block => block.classList.remove('active'));
+                const targetBlock = document.getElementById(targetId);
+                if (targetBlock) {
+                    targetBlock.classList.add('active');
+                    // 滚动到内容顶部
+                    document.querySelector('.terminal-content').scrollTop = 0;
+                }
+            }
+        });
     });
-});
 
-// 充值选项点击效果
-const rechargeOptions = document.querySelectorAll('.recharge-option');
-rechargeOptions.forEach(option => {
-    option.addEventListener('click', () => {
-        rechargeOptions.forEach(opt => opt.classList.remove('active'));
-        option.classList.add('active');
+    // 充值选项点击效果
+    const rechargeOptions = document.querySelectorAll('.recharge-option');
+    rechargeOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            rechargeOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+        });
     });
-});
 
-// 光标闪烁效果
-setInterval(() => {
-    const cursor = document.getElementById('cursor');
-    if (cursor) cursor.style.opacity = cursor.style.opacity === '0' ? '1' : '0';
-}, 500);
+    // 光标闪烁效果
+    setInterval(() => {
+        const cursor = document.getElementById('cursor');
+        if (cursor) cursor.style.opacity = cursor.style.opacity === '0' ? '1' : '0';
+    }, 500);
+});
 </script>
 
 </body>
