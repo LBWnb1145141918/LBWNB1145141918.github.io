@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCIPNET终端V2 - SITE-119</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Consolas','Courier New',monospace;}
+body{background-color:#091219;background-image:linear-gradient(rgba(0,15,20,0.8)1px,transparent 1px),linear-gradient(90deg,rgba(0,15,20,0.8)1px,transparent 1px);background-size:25px 25px;color:#00ffff;overflow-y:hidden;height:100vh;position:relative;}
+.terminal-header{background-color:rgba(0,26,26,0.8);border-bottom:1px solid #00ffff;padding:8px 20px;display:flex;justify-content:space-between;align-items:center;font-size:16px;text-shadow:0 0 5px #00ffff;position:relative;z-index:1;}
+.header-left{color:#00ffff;}
+.header-right{color:#00ccff;font-size:14px;}
+.terminal-main{margin:15px 20px;border:1px solid #008888;background-color:rgba(0,35,35,0.5);height:calc(100vh - 80px);display:flex;flex-direction:column;position:relative;z-index:1;}
+.terminal-bar{padding:6px 10px;border-bottom:1px solid #008888;font-size:14px;color:#00ccff;}
+.terminal-content{padding:10px;flex:1;overflow-y:auto;font-size:14px;line-height:1.6;}
+.content-block{display:none;}
+.content-block.active{display:block;}
+.prompt{color:#00ffcc;margin-right:8px;}
+.menu-item{margin:5px 0;padding-left:15px;color:#00ccff;cursor:pointer;}
+.menu-item:hover{color:#00ffff;text-shadow:0 0 3px #00ffff;}
+.menu-item.active{color:#00ffff;text-shadow:0 0 4px #00ffff;}
+.back-menu{margin:15px 0;padding:8px 15px;background-color:rgba(0,100,100,0.6);border:1px solid #00ffff;border-radius:4px;color:#00ff99;font-weight:bold;text-shadow:0 0 5px #00ff99;cursor:pointer;}
+.back-menu:hover{background-color:rgba(0,150,150,0.8);text-shadow:0 0 8px #00ff99;}
+.terminal-footer{padding:6px 10px;border-top:1px solid #008888;font-size:12px;color:#008888;text-align:right;}
+a{color:#00ffcc;text-decoration:underline;}
+/* 起源档案专属样式 */
+.norbert-content h1,.norbert-content h2{color:#00ffff;margin:15px 0 8px 0;text-shadow:0 0 3px #00ffff;}
+.norbert-content .log-title{color:#00ff99;font-weight:bold;margin-top:12px;}
+.norbert-content .log-content{margin-left:2em;color:#00e0e0;}
+.norbert-content .note{color:#ffcc00;font-style:italic;margin:8px 0 8px 2em;}
+.norbert-content hr{border:1px solid #008888;margin:15px 0;}
+.norbert-content .blink{animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+/* 入职申报 —— 统一终端深色风格 */
+.onboarding-form{background:transparent !important;color:#00ffff;padding:10px 0;font-family:'Consolas','Courier New',monospace;line-height:1.8;}
+.onboarding-form h1,.onboarding-form h2,.onboarding-form h3{color:#00ffff;text-shadow:0 0 4px #00ffff;text-align:center;}
+.onboarding-form h1{font-size:26px;}
+.onboarding-form h2{font-size:18px;margin-bottom:10px;}
+.onboarding-form h3{font-size:18px;margin:15px 0 10px 0;}
+.form-header-note{font-size:12px;text-align:right;color:#00cccc;}
+.form-row{display:flex;margin:6px 0;align-items:center;}
+.form-label{width:200px;color:#00ffcc;}
+.form-input{flex:1;border-bottom:1px solid #008888;min-height:20px;color:#ffffff;}
+.form-table{border:1px solid #008888;width:280px;}
+.form-table th{color:#00ffcc;padding:6px;text-align:left;border-bottom:1px solid #008888;}
+.form-table td{padding:4px 8px;color:#00cccc;}
+.form-photo-box{width:140px;height:140px;border:1px solid #008888;text-align:center;color:#00cccc;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><rect width="140" height="140" fill="%23091219"/><g fill="%2300ffcc"><circle cx="35" cy="35" r="28"/><circle cx="35" cy="35" r="10"/><circle cx="105" cy="35" r="28"/><circle cx="105" cy="35" r="10"/><circle cx="35" cy="105" r="28"/><circle cx="35" cy="105" r="10"/><circle cx="105" cy="105" r="28"/><circle cx="105" cy="105" r="10"/><rect x="55" y="55" width="30" height="30" rx="4" fill="%2300ffcc"/><rect x="55" y="55" width="10" height="10" fill="%23091219"/></g></svg>');background-repeat:no-repeat;background-position:center;background-size:cover;padding-top:0;}
+.form-qrcode{width:140px;height:140px;border:1px solid #008888;text-align:center;color:#00cccc;padding-top:40px;font-size:12px;}
+.form-footer{margin-top:20px;text-align:right;color:#00cccc;}
+/* SCP档案列表样式 */
+.scp-list{margin:10px 0;display:grid;gap:6px;}
+.scp-item{color:#00ccff;padding:4px 10px;border-left:2px solid #008888;cursor:pointer;}
+.scp-item:hover{color:#00ffff;border-left-color:#00ffff;}
+.scp-doc{white-space:pre-line;margin:10px 0;line-height:1.6;color:#e0e0e0;}
+
+/* ==================== 充值页面样式 ==================== */
+.recharge-screen{padding:20px;}
+.recharge-title{font-size:24px;color:#00ffcc;margin-bottom:20px;border-bottom:1px solid #008888;padding-bottom:10px;}
+.recharge-options{display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;}
+.recharge-option{padding:10px 20px;border:1px solid #008888;border-radius:4px;color:#00ccff;cursor:pointer;}
+.recharge-option:hover{border-color:#00ffff;color:#00ffff;}
+.recharge-option.active{border-color:#00ffcc;background-color:rgba(0,255,204,0.1);color:#00ffcc;}
+.recharge-custom{margin-top:20px;}
+.recharge-custom label{color:#00ccff;margin-right:10px;}
+.recharge-custom input{background-color:#091219;border:1px solid #008888;color:#00ffcc;padding:8px;width:200px;}
+.recharge-btn{margin-top:20px;padding:10px 30px;background-color:rgba(0,255,204,0.2);border:1px solid #00ffcc;color:#00ffcc;border-radius:4px;cursor:pointer;}
+.recharge-btn:hover{background-color:rgba(0,255,204,0.4);}
+
+/* ==================== SCP等级颜色 ==================== */
+.safe { color: #00FF00 !important; font-weight: bold; }
+.euclid { color: #FFFF00 !important; font-weight: bold; }
+.keter { color: #FF3333 !important; font-weight: bold; }
+
+/* ==================== 修复 ERROR 界面文字 ==================== */
+.error-screen{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:40px;}
+.big-error-text{
+    font-size: 120px;
+    font-weight: bold;
+    color: #ff0033;
+    text-shadow: 0 0 20px #ff0033, 0 0 40px #00ffcc;
+    animation: glow 1s infinite alternate;
+}
+@keyframes glow{0%{filter:brightness(1);}100%{filter:brightness(1.5);}}
+</style>
+</head>
+<body>
+
+<div class="terminal-header">
+<div class="header-left">SCIPNET终端V2 - SITE-119</div>
+<div class="header-right">访问层级：5 | 状态：在线 | 服务器：CN-119</div>
+</div>
+
+<div class="terminal-main">
+<div class="terminal-bar">███ SCP基金会 - 119号站点 ███ | 仅限授权人员 | 所有活动已记录</div>
+
+<div class="terminal-content">
+
+<!-- 主菜单（新增充值选项） -->
+<div class="content-block active" id="main">
+<p><span class="prompt">></span> 登录成功 - 欢迎来到119号站点 SCIPNET</p>
+<p><span class="prompt">></span> 最后一次日志：2026-03-10 17：00：00（CN-119服务器）</p>
+<p><span class="prompt">></span> 当前地点：119号基地（主场）</p>
+<br>
+<p class="active">主菜单：</p>
+<!-- 左上角往下一点的充值选项 -->
+<div class="menu-item" data-target="recharge" style="margin-top:10px;">• 充值</div>
+<div class="menu-item" data-target="scp-list">• SITE-119 SCP档案</div>
+<div class="menu-item" data-target="main">• SITE-119工程资料报表</div>
+<div class="menu-item" data-target="norbert">• Norbert 计划 // 起源</div>
+<div class="menu-item" data-target="main">• 119号基地人员数据库</div>
+<div class="menu-item" data-target="entry">• SITE-119入职申报</div>
+
+<!-- 右下角ERROR菜单 -->
+<div style="text-align: right; margin-top: 60px;">
+<div class="menu-item" data-target="error" style="color:#ff0033; font-weight:bold; text-shadow:0 0 8px #ff0033;">
+• ERROR
+</div>
+</div>
+
+<br>
+<p><span class="prompt">></span> 输入"帮助"以获取命令列表</p>
+<p><span class="prompt">></span> <span id="cursor">_</span></p>
+</div>
+
+<!-- ==================== 充值页面 ==================== -->
+<div class="content-block" id="recharge">
+<div class="recharge-screen">
+<div class="recharge-title">充值中心</div>
+<div class="recharge-options">
+<div class="recharge-option" data-amount="10">¥10</div>
+<div class="recharge-option" data-amount="20">¥20</div>
+<div class="recharge-option" data-amount="30">¥30</div>
+<div class="recharge-option" data-amount="50">¥50</div>
+<div class="recharge-option" data-amount="100">¥100</div>
+</div>
+<div class="recharge-custom">
+<label for="custom-amount">任意充值：¥</label>
+<input type="number" id="custom-amount" placeholder="请输入充值金额" min="1">
+</div>
+<button class="recharge-btn">确认充值</button>
+</div>
+<div class="back-menu" data-target="main">【返回主菜单】</div>
+</div>
+
+<!-- SCP 列表页 -->
+<div class="content-block" id="scp-list">
+<p><span class="prompt">></span> 正在加载 SCP 档案库...</p>
+<div class="scp-list">
+<div class="scp-item" data-target="scp-035">SCP-035 占据面具</div>
+<div class="scp-item" data-target="scp-049">SCP-049 疫医</div>
+<div class="scp-item" data-target="scp-049-2">SCP-049-2 尸化个体</div>
+<div class="scp-item" data-target="scp-054">SCP-054 人形阴影</div>
+<div class="scp-item" data-target="scp-096">SCP-096 害羞的人</div>
+<div class="scp-item" data-target="scp-106">SCP-106 恐怖老人</div>
+<div class="scp-item" data-target="scp-939">SCP-939 千喉之兽</div>
+<div class="scp-item" data-target="scp-1128">SCP-1128 水中巨物</div>
+<div class="scp-item" data-target="scp-252">SCP-252 拟态沧龙</div>
+</div>
+<div class="back-menu" data-target="main">【返回主菜单】</div>
+</div>
+
+<!-- ==================== 带等级颜色的SCP档案 ==================== -->
+<div class="content-block" id="scp-035">
+<div class="scp-doc">
+项目编号：SCP-035
+项目等级：<span class="keter">Keter</span>
+特殊收容措施：SCP-035必须被存放在气密密封容器中，置于安全等级4的收容间内。任何情况下不得直接接触SCP-035。所有研究必须在远程观察下进行。任何与SCP-035沟通的人员必须接受A级心理评估。
+
+描述：SCP-035是一具白色喜剧/悲剧双面相面具。任何与SCP-035进行视线接触或直接接触的生物会迅速被其精神影响控制，认为面具是智慧、友善、极具说服力的存在，并会主动将其佩戴在面部。
+
+佩戴者会在短时间内被完全取代，意识被抹除，身体成为SCP-035的载体。SCP-035拥有极强的精神操控、说服与模因能力，能诱导他人自毁、背叛或执行其指令。
+
+SCP-035会缓慢腐蚀其接触的所有物质，包括金属、混凝土、有机组织，最终导致结构崩坏。长期接触区域会出现腐败、坏死、精神污染与空间不稳定现象。
+</div>
+<div class="back-menu" data-target="scp-list">【返回SCP列表】</div>
+</div>
+
+<div class="content-block" id="scp-049">
+<div class="scp-doc">
+项目编号：SCP-049
+项目等级：<span class="euclid">Euclid</span>
+特殊收容措施：SCP-049被安置在标准人形生物收容单元中。每周提供一次基本营养补给。任何与SCP-049的接触必须由至少两名3级以上人员监督。禁止在无防护情况下靠近SCP-049三米以内。
+
+描述：SCP-049外观为中世纪瘟疫医生装束，头部被鸟嘴面具完全覆盖，无法观察面部。其身体结构异常，无法检测到正常生命体征，但表现出完全的自我意识与智慧。
+
+SCP-049相信自己在“治愈”一种它称之为“瘟疫”的疾病，而它认为所有人类都感染了此病。当SCP-049接触人类时，会迅速导致目标心脏骤停、脑死亡，目标在数秒内死亡。
+
+随后SCP-049会对尸体进行不明手术，将其转化为SCP-049-2个体。SCP-049具有高度智能，能流利使用多种语言，具有逻辑、文化与科学知识，对基金会抱有复杂态度。
+</div>
+<div class="back-menu" data-target="scp-list">【返回SCP列表】</div>
+</div>
+
+<div class="content-block" id="scp-049-2">
+<div class="scp-doc">
+项目编号：SCP-049-2
+项目等级：<span class="euclid">Euclid</span>
+特殊收容措施：SCP-049-2个体必须被单独收容，使用镇静剂或物理约束控制。所有SCP-049-2样本被视为高风险生物，必须在武装警卫监视下保存。
+
+描述：SCP-049-2是由SCP-049“手术治愈”后的尸体所转化的生物。个体失去人类意识，表现出极端攻击性、高速反应与强大力量。它们无视大部分常规伤害，不受疼痛影响。
+
+SCP-049-2会攻击任何活物，通过撕咬、殴打等方式试图杀死目标。它们对SCP-049表现出绝对服从，被视为其“治愈”产物。
+
+SCP-049认为SCP-049-2是健康、纯净、无瘟疫的存在，是其工作的成功证明。
+</div>
+<div class="back-menu" data-target="scp-list">【返回SCP列表】</div>
+</div>
+
+<div class="content-block" id="scp-054">
+<div class="scp-doc">
+项目编号：SCP-054
+项目等级：<span class="euclid">Euclid</span>
+特殊收容措施：SCP-054收容室必须保持完全光照，无任何阴影区域。照明系统必须配备多重冗余电源。禁止在收容室内使用任何可产生阴影的物体或光源。
+
+描述：SCP-054是一种人形阴影实体，通常出现在封闭空间的阴影区域。它没有实体，无法被物理攻击伤害。当人类进入SCP-054所在的阴影时，SCP-054会尝试与目标交换位置。
+
+交换后，受害者会变成阴影被困在原地，而SCP-054则暂时获得物理身体，模仿受害者行为。SCP-054会逐渐适应实体形态，变得更加危险、具有攻击性。
+
+当光照恢复时，SCP-054会被强制返回阴影形态，受害者有概率恢复原状，但多次交换会导致永久性意识丧失或精神崩溃。
+</div>
+<div class="back-menu" data-target="scp-list">【返回SCP列表】</div>
+</div>
+
+<div class="content-block" id="scp-096">
+<div class="scp-doc">
+项目编号：SCP-096
+项目等级：<span class="keter">Keter</span>
+特殊收容措施：SCP-096被收容于12米×12米×12米的密封收容间内。所有观察必须通过无镜头监控设备进行。严禁任何人类以任何方式直接或间接看到SCP-096的面部。
+
+描述：SCP-096是一个身高约2.8米的人形生物，肢体不成比例，皮肤苍白，身体结构异常。SCP-096通常处于被动、蜷缩、沉默状态。
+
+异常效应：当任何人类看到SCP-096的面部（无论直接、照片、视频、绘画、数字图像），SCP-096会立即进入狂暴状态，以极快速度冲向观察者，无论距离多远。
+
+SCP-096会无视物理障碍、距离、防护，强行抵达目标位置，以极端暴力方式将观察者撕碎。事件结束后，SCP-096会回到被动状态。目前没有任何已知方法能阻止其攻击。
+</div>
+<div class="back-menu" data-target="scp-list">【返回SCP列表】</div>
+</div>
+
+<div class="content-block" id="scp-106">
+<div class="scp-doc">
+项目编号：SCP-106
+项目等级：<span class="keter">Keter</span>
+特殊收容措施：SCP-106被收容于强化密封收容单元，内部保持持续潮湿、腐蚀环境。收容室配备多重电磁约束系统。任何情况下不得让SCP-106接触人类活体组织。
+
+描述：SCP-106被称为“恐怖老人”，是一具腐烂、枯瘦、类似老年男性的实体，全身覆盖黑色黏液状物质，持续腐蚀接触到的所有物质。
+
+SCP-106能够穿透固体物质，进入一种被称为“口袋维度”的异空间。它会捕猎人类，将目标拖入口袋维度，在其中进行长时间折磨、分解与消化。
+
+SCP-106行动缓慢，但极其耐心、残忍，拥有极高智能与捕猎意识。其腐蚀性物质能破坏几乎所有已知材料，对金属、混凝土、生物组织具有毁灭性效果。重新收容程序极其危险且成功率有限。
+</div>
+<div class="back-menu" data-target="scp-list">【返回SCP列表】</div>
+</div>
+
+<div class="content-block" id="scp-939">
+<div class="scp-doc">
+项目编号：SCP-939
+项目等级：<span class="euclid">Euclid</span>
+特殊收容措施：SCP-939群体被收容于大型模拟自然环境收容单元，配备隔音、防挖结构。喂食周期为每周一次，禁止在收容区域内制造高频声音。
+
+描述：SCP-939是一类群居型掠食生物，无视觉、无消化系统、无呼吸系统，身体结构高度特化用于捕猎。它们拥有极长四肢、锋利爪牙、红色皮肤与巨大口部。
+
+SCP-939的核心异常能力是模仿声音。它们可以完美复制、回放它们听过的任何人类语言、呼喊、尖叫、对话，甚至模仿特定个体的声音。
+
+SCP-939利用模仿的人类声音引诱目标靠近，然后进行伏击。它们对声音极度敏感，依靠声源定位捕猎。群体行动，具有高度协作性与捕猎智慧。
+</div>
+<div class="back-menu" data-target="scp-list">【返回SCP列表】</div>
+</div>
+
+<div class="content-block" id="scp-1128">
+<div class="scp-doc">
+项目编号：SCP-1128
+项目等级：<span class="keter">Keter</span>
+特殊收容措施：SCP-1128无法被物理收容。所有已知相关信息、描述、图像、音频必须被严格管控，禁止未经授权传播。所有接触人员必须接受记忆删除或A级心理隔离。
+
+描述：SCP-1128是一种仅通过认知传播的水生异常实体，被描述为巨大、深海掠食性生物，类似史前海洋爬行动物，具有极端攻击性。
+
+异常效应：
+任何了解、想象、听说、阅读或看到SCP-1128描述的人类，会在进入任何深度超过10厘米的水体时，被SCP-1128视为目标。
+
+无论水体是泳池、浴缸、水坑、水杯，SCP-1128都会瞬间出现并攻击目标，将其拖入水中杀死。攻击不受物理距离、水体大小限制。
+
+SCP-1128无法被观测、记录或拦截，仅存在于认知与受害者的体验中。信息本身就是它的传播途径与收容突破口。
+</div>
+<div class="back-menu" data-target="scp-list">【返回SCP列表】</div>
+</div>
+
+<div class="content-block" id="scp-252">
+<div class="scp-doc">
+项目编号：SCP-252
+项目等级：<span class="euclid">Euclid</span>
+特殊收容措施：SCP-252被收容于大型水族收容单元，水体保持低温、低光照。禁止任何人员直接目视SCP-252本体，观察必须使用滤镜或间接监控。
+
+描述：SCP-252是一种类似沧龙的巨型海洋生物，但其形态并非完全存在于现实维度。SCP-252具有强大的认知影响与拟态能力。
+
+当人类直接观察SCP-252时，大脑无法处理其真实形态，会自动将其“解释”为普通海洋生物、岩石、波浪等无害物体。
+
+但在压力、恐惧、水下、黑暗环境下，认知过滤会失效，观察者会瞬间看到其真实形态，引发极端恐惧、精神崩溃、永久性创伤，甚至心脏骤停。
+
+SCP-252会主动利用这一特性捕猎，接近目标后解除拟态，利用精神冲击使目标失去行动能力。
+</div>
+<div class="back-menu" data-target="scp-list">【返回SCP列表】</div>
+</div>
+
+<!-- ==================== Norbert 计划 // 起源 完整内容 ==================== -->
+<div class="content-block norbert-content" id="norbert">
+<p><span class="prompt">></span> 正在加载 Norbert 计划 // 起源 档案...</p>
+<p class="log-content loading"><span class="prompt">></span> 数据来源：https://scp-wiki-cn.wikidot.com/2025newbee-clementine1047</p>
+<p class="log-content loading"><span class="prompt">></span> 档案等级：4/ERROR级机密 | 访问权限：5级及以上</p>
+<hr>
+<h1>项目编号：ERROR</h1>
+<h2>等级：4级</h2>
+<h2>收容等级：机密</h2>
+<h2>次要等级：XK级世界末日情景</h2>
+<h2>扰动等级：amida</h2>
+<h2>风险等级：危急</h2>
+<hr>
+<p class="log-title"><span class="prompt">></span> 档案前置说明</p>
+<p class="log-content">Site-119的悲剧成为了基金会档案中又一个血腥的注脚，一个关于傲慢、盲目、疯狂以及在面对不可名状之物时人类挣扎的警示故事。然而，深渊的低语并未停止，它只是找到了新的听众，在新的黑暗中，等待着下一次的回响。</p>
+<p class="log-content">根据监督者议会的命令，以下文件为4/ERROR级机密。禁止未经授权的访问。</p>
+<hr>
+<p class="log-title"><span class="prompt">></span> 终端初始化记录</p>
+<p class="log-content">SCP FOUNDATION - SECURE TERMINAL v3.14 - SITE-119 ARCHIVES</p>
+<p class="log-content">> 正在初始化安全终端连接…</p>
+<p class="log-content">> 验证用户凭据…</p>
+<p class="log-content">> 您的资料存在于基金会数据库中，访问授予_</p>
+<p class="log-content">> 欢迎回来，Professor "■■■"</p>
+<p class="log-content">> 电子信标【MORRIS-RHN_Stability_Anchor_Admin】已录入，查询中……</p>
+<p class="log-content">> 警告：本数据库仅限具基金会4级及以上权限者访问。</p>
+<p class="log-content">> 部分档案可能需要5级或更高权限访问。</p>
+<p class="log-content">> 不具有相应权限者请勿访问本数据库内存储的相应信息。</p>
+<p class="log-content">> 违规访问将面临基金会的定位及处罚措施。</p>
+<p class="log-content">> 已确认您已接受过模因接种，请继续向下滑动以完成调阅程序。</p>
+<p class="log-content">> 请谨慎行事_</p>
+<p class="log-content">> 【基金会特密级文件存储服务器调取中】</p>
+<p class="log-content">> [链接中]</p>
+<p class="log-content">> ………………[等待Site-119设施服务器响应]</p>
+<p class="log-content">> [无响应，已自动链接备用服务终端]</p>
+<p class="log-content">> 您申请调阅的是封存代号为【■-■■-■■2■】的文件</p>
+<p class="log-content">> 文档状态为最新，祝您工作顺利<span class="blink">_</span></p>
+<hr>
+<p class="log-title"><span class="prompt">></span> 事件日志记录 - 第一章：海面上的杂音</p>
+<p class="log-content"><strong>日期：</strong>2020年XX月XX日</p>
+<p class="log-content"><strong>记录相关人员数据：</strong></p>
+<p class="log-content">· 艾伦·威克斯 (Alan Wickes): 基金会海面支援船“奥密克戎”号通信专员</p>
+<p class="log-content">· 莎拉·简宁斯 (Sarah Jennings): Site-119内部通信中心技术员</p>
+<p class="log-content"><strong>记录背景：</strong> SITE-119加密通讯频道</p>
+<p class="log-content"><strong>[记录开始]</strong></p>
+<p class="log-content">艾伦·威克斯： “奥密克戎”呼叫Site-119内部通信，每日例行校验。</p>
+<p class="log-content">艾伦·威克斯： 莎拉，收到请回复。</p>
+<p class="log-content">（短暂的静默，只有深海水声信道特有的、低沉的背景白噪音）</p>
+<p class="log-content">莎拉·简宁斯： ……收到!</p>
+<p class="log-content">莎拉·简宁s： “奥密克戎”，我是简宁斯。</p>
+<p class="log-content">莎拉·简宁斯：数据链路稳定……生命维持系统绿色，压力容器完整性绿色。稳定锚……输出频率在预设参数内。完毕。</p>
+<p class="log-content">艾伦·威克斯：复制。数据流已确认，曲线平滑就像基金会每周一成不变的伙食，哈哈。</p>
+<p class="log-content">（对话停止了大约40秒，伴随着无线电噪声背景音）</p>
+<p class="log-content">艾伦·威克斯：说真的，在你们头顶呆了三个星期，最大的威胁是无聊。雷达上除了货船就是偶尔迷路的鲸鱼。这下面可比我想象的“安静”多了。完毕。</p>
+<p class="log-content">莎拉·简宁斯：（轻微停顿）深度会过滤掉很多杂音，艾伦。</p>
+<p class="log-content">莎拉·简宁斯：几千个大气压……能迫使一切趋于有序。这里的生态系统……有其独特的模式。</p>
+<p class="log-content">莎拉·简宁斯：深潜研究部门上次报告说，在热液喷口区观察到了新的发光生物群落，形态非常……别致？完毕。</p>
+<p class="log-content">艾伦·威克斯：别致？这可不是形容海洋生物的常用词。</p>
+<p class="log-content">艾伦·威克斯：听起来像是莫里斯博士上台后的新词汇？听说他把他那套工程学的精确性都带到管理上了。完毕。</p>
+<p class="log-content">莎拉·简宁斯：莫里斯博士……非常注重效率和系统的稳定性。（语调加快）他强调了定期维护和保养稳定锚为第一优先性。</p>
+<p class="log-content">莎拉·简宁斯：他说，在这如此深的地方，任何微小的偏离都可能被指数级放大。我们必须……维持绝对的控制。为了纪念逝者，也为了未来。完毕。</p>
+<p class="log-content">艾伦·威克斯：理解。墨港的悲剧对每个人都是打击……希望现在一切能真正走上正轨。</p>
+<p class="log-content">艾伦·威克斯：哦，说到这个。我们这边的被动声纳阵列，大约18小时前，在站点东北方向，大概25海里处，捕捉到一个短暂的宽频信号。</p>
+<p class="log-content">艾伦·威克斯：深度很大，特征不像是已知的生物或地质活动。持续时间很短，仅仅几秒钟，然后就消失了。</p>
+<p class="log-content">艾伦·威克斯：指挥层让我询问，站点外部传感器阵列是否有任何相关的异常记录？完毕。</p>
+<p class="log-content">莎拉·简宁斯：…………（沉默，伴随着急促的键盘声）</p>
+<p class="log-content">莎拉·简宁斯： ……我核查了过去24小时所有外部传感器的日志。水听器阵列、磁场监测、残余奇术波动探测器……没有任何匹配的异常报告。</p>
+<p class="log-content">莎拉·简宁斯：那个位置……靠近断裂带边缘，声波传播有时会产生难以预测的折射。可能是某种地质活动的回声，或者……</p>
+<p class="log-content">莎拉·简宁斯：只是一大群深海散射层生物的集体移动。完毕。</p>
+<p class="log-content">艾伦·威克斯：可能吧。指挥层也只是按规程办事。大概率又是虚惊一场。</p>
+<p class="log-content">艾伦·威克斯：就像上周那艘“九尾狐”的例行探测潜艇，识别码响应慢了几秒，害得我们差点启动应急协议。完毕。</p>
+<p class="log-content">莎拉·简宁斯： “九尾狐”的潜艇？（声音提高）上周？</p>
+<p class="log-content">莎拉·简宁斯： 调度日志里没有记录任何“九尾狐”的访问计划……内部通讯也没有收到通知。你确定是上周吗？完毕。</p>
+<p class="log-content">艾伦·威克斯：（声音颤动）嗯？是吗？也许我记混了日子，或者是更低层级的数据交换，没记录在你们的主日程上。</p>
+<p class="log-content">艾伦·威克斯：你知道，我这边的信息流也像这海水一样，分好多层。好了，例行检查完毕。链接强度良好，“奥密克戎”签署离线。保重，莎拉。完毕。</p>
+<p class="log-content">莎拉·简宁斯： ……保持联系，艾伦。（声音恍惚）愿……愿深渊保持平静。Site-119签署离线。</p>
+<p class="log-content">（通讯信道关闭，只剩下低沉的白噪音，持续数秒后彻底静默）</p>
+<p class="log-content"><strong>[记录结束]</strong></p>
+<p class="note">// 附加备注 - 通信专员威克斯的私人日志摘录</p>
+<p class="note">// 日期：[同记录日期]</p>
+<p class="note">与Site-119的日常通联技术层面无异常，但简宁斯技术员的反应有细微的不协调感。</p>
+<p class="note">她对“平静”和“控制”的强调次数异常，且对“九尾狐”潜艇访问的不知情与常规信息共享协议不符。</p>
+<p class="note">这可能是莫里斯博士新管理规程下的信息壁垒所致，也可能是我多心了。那个未记录的声纳信号……以及简宁斯提到“别致”的新生物群落。</p>
+<p class="note">深海的“平静”之下，似乎潜藏着我听不懂的低语，已将通信记录及观察要点提交指挥层。我将继续监视，这水……好像越来越冷了。</p>
+<hr>
+<p class="log-title"><span class="prompt">></span> 事件日志记录 - 第二章：延迟与回声</p>
+<p class="log-content"><strong>日期：</strong>2020年XX月XX日</p>
+<p class="log-content"><strong>记录相关人员数据：</strong></p>
+<p class="log-content">· 艾伦·威克斯 (Alan Wickes): 基金会海面支援船“奥密克戎”号通信专员</p>
+<p class="log-content">· 莎拉·简宁斯 (Sarah Jennings): Site-119内部通信中心技术员</p>
+<p class="log-content">· 罗伯特·莫里斯博士 (Dr. Robert Morris): Site-119 新任设施主管（原工程部门主管）</p>
+<p class="log-content"><strong>记录背景：</strong> SITE-119加密通讯频道，距离上一次通信过去约36小时</p>
+<p class="log-content"><strong>[记录开始]</strong></p>
+<p class="log-content">艾伦·威克斯："奥密克戎"呼叫Site-119内部通信。莎拉，请回应。完毕。</p>
+<p class="log-content">（通讯信道里传来的白噪音比往常更响，夹杂着细微的、仿佛金属扭曲的尖啸声）</p>
+<p class="log-content">莎拉·简宁斯：（声音迟缓，且带有失真） 收……到，"奥密克戎"。我是简宁斯。数据……链路……正在稳定。完毕。</p>
+<p class="log-content">艾伦·威克斯： 莎拉？你的信号不太稳定。是信道干扰吗？我们这边的数据流也出现了断续，稳定锚的遥测数据包丢失了大约三秒钟。完毕。</p>
+<p class="log-content">莎拉·简宁斯：（声音断断续续） 是的……通信……受到干扰。莫里斯博士……正在调整稳定锚的输出频率。他说……需要优化……系统的谐振点，可能会引起……暂时的……通讯波动。完毕。</p>
+<p class="log-content">艾伦·威克斯： 调整频率？在这种深度？（声音逐渐微弱） 这符合安全规程吗？遥测数据显示你们的核心温度有轻微上升趋势。完毕。</p>
+<p class="log-content">莎拉·简宁斯： 博士说……这是必要的微调，为了应对……海沟地质结构的……微小变化。他……很确信。（声音陡然提高，随后迅速压低） 艾伦，你上次提到的那个声纳信号……还有记录到更多细节吗？完毕。</p>
+<p class="log-content">艾伦·威克斯： 暂时没有，信号消失后就再没出现。指挥层认为可能是设备故障或一次性的异常水声现象。（声音略作停顿） 为什么问这个？你们下面是不是发现了什么？完毕。</p>
+<p class="log-content">莎拉·简宁斯：（语速加快） 不，没有。只是……例行核对，以确保所有异常报告都闭环处理，莫里斯博士强调……细节的重要性。完毕。</p>
+<p class="log-content">（背景中，隐约传来一个冷静、略带技术官僚口吻的男性声音，似乎在对简宁斯说话，但听不清内容）</p>
+<p class="log-content">莎拉·简宁斯：（语调平淡） "奥密克戎"，数据链路已重新稳定，生命维持系统读数正常，压力稳定。稳定锚调整已完成第一阶段，系统……运行平稳，暂无其他异常报告。完毕。</p>
+<p class="log-content">艾伦·威克斯： 收到……（声音渐弱） 我会继续保持监视，如果信道质量持续不佳，我认为我们需要启动备用通讯协议。另外……莎拉，你还好吗？你的声音听起来很累。完毕。</p>
+<p class="log-content">莎拉·简宁斯： 我很好。（声音僵硬） 只是……一切都很正常。在深海里，时间感会变得不同，谢谢关心。"奥密克戎"，Site-119签署离线。愿……系统保持稳定。</p>
+<p class="log-content">（通讯终止，仅传来无线电噪声背景音）</p>
+<p class="log-content">艾伦·威克斯： （声音微弱） ……系统保持稳定？她以前从不说这个。</p>
+<p class="log-content"><strong>[记录结束]</strong></p>
+<p class="note">// 附加文件：奥密克戎号声纳官的非正式报告</p>
+<p class="note">// 致： 船务指挥层 来自： 声纳技术员 迈尔斯</p>
+<p class="note">// 主题： 低频噪音观察</p>
+<p class="note">在过去24小时内，被动声纳阵列持续接收到一种极低频的背景噪音，源点模糊，似乎广泛分布于Site-119所在海沟区域。</p>
+<p class="note">该噪音不同于已知的地质活动声纹，其波形呈现出一种……不自然的规律性，类似于大型机械的怠速运转，但频率低得多，几乎与自然环境融为一体。</p>
+<p class="note">噪音强度随时间缓慢增强，增幅微小但持续。建议提高对水下声学环境的监控级别。</p>
+<p class="note">// Site-119内部备忘录片段</p>
+<p class="note">// 发件人： 罗伯特·莫里斯博士 收件人： 所有部门主管</p>
+<p class="note">// 主题： 稳定锚优化计划</p>
+<p class="note">为确保站点长期结构安全与现实稳定性，我将亲自领导对稳定锚系统的系列优化校准。</p>
+<p class="note">此过程可能导致站点内部出现轻微且暂时的感官现象，包括但不限于：光线闪烁、听觉上的低频嗡鸣或轻微的振动感。</p>
+<p class="note">这些均属系统重新平衡过程中的正常预期现象，无需恐慌。所有人员须专注于本职工作，无需报告此类无关紧要的感知干扰。</p>
+<p class="note">效率与控制是我们在此深渊中生存的基石。</p>
+<hr>
+<p class="log-title"><span class="prompt">></span> 事件日志记录 - 第三章：无关紧要的感知干扰</p>
+<p class="log-content"><strong>日期：</strong>2020年XX月XX日</p>
+<p class="log-content"><strong>记录相关人员数据：</strong></p>
+<p class="log-content">· 艾伦·威克斯 (Alan Wickes): 基金会海面支援船“奥密克戎”号通信专员</p>
+<p class="log-content">· 莎拉·简宁斯 (Sarah Jennings): Site-119内部通信中心技术员</p>
+<p class="log-content">· 本·卡特 (Ben Carter): Site-119 二级维护工程师</p>
+<p class="log-content"><strong>记录背景：</strong> Site-119下层管道维修通道，卡特通过内部线路与通信中心的简宁斯通话</p>
+<p class="log-content"><strong>[记录开始-内部通讯日志，维护频道Gamma]</strong></p>
+<p class="log-content">本·卡特：（声音出现明显回音，且伴随着周期性的滴水声） 莎拉？你在听吗？我现在在Delta-7号管道交汇处，就是靠近旧生物实验室废弃区的那段。</p>
+<p class="log-content">莎拉·简宁s： （声音飘忽不定） 我在，本。有什么问题，难道是湿度调节器又抽风了？完毕。</p>
+<p class="log-content">本·卡特： 比那糟多了。你听着……（卡特用工具轻轻敲击管道壁，同时沉闷的金属声通过通信频道传来） 听到没？这声音不对。这厚度……感觉不像是一英寸的标准合金板，倒像是……敲在什么更厚实、密度更大的东西上。</p>
+<p class="log-content">莎拉·简宁斯： 可能是内壁结了更厚的生物矿化层。把扫描仪对准它。完毕。</p>
+<p class="log-content">本·卡特： 试过了，便携式扫描仪的读数乱跳。超声波回波显示管道壁的微观结构……不均匀，有奇怪的层理，像……肌肉纤维或者木质纹理，而不是金属结晶。</p>
+<p class="log-content">而且，（声音减弱） 你绝对不敢相信我看到了什么。管道内壁上……出现了一些纹路，它不是锈蚀，不是刮痕。是……刻上去的，或者长出来的。非常复杂，像某种电路，又像……某种我不认识的文字，还在微微发光，一种……很不舒服的淡蓝色。</p>
+<p class="log-content">莎拉·简宁斯： （沉默了6秒，随后短信的提示声响起） ……莫里斯博士的通知。他说这可能是稳定锚调整期间的'感官现象'或'光学错觉'，建议忽略。完毕。</p>
+<p class="log-content">本·卡特： 忽略？ 莎拉，这不是错觉！我用手摸过了！是实实在在的凹凸感，还有点……温热？这不符合任何物理规律！我觉得我们应该报告给科斯塔主管，这可能是某种收容失效的迹象……</p>
+<p class="log-content">莎拉·简宁斯： （声音强硬插入，且言语僵硬、重复） 本！遵循规程。莫里斯博士强调，所有资源必须优先保障稳定锚优化，此类无关紧要的感知干扰，不得占用安保资源。继续你的例行检查，记录在案即可。完毕。</p>
+<p class="log-content">本·卡特： 莎拉？你……（通讯信号的另一头传来了一阵若有若无且极其低沉、几乎无法察觉的嗡鸣，随后简宁斯的呼吸声略微加重） ……好吧，记录在案。卡特签署离线，愿……系统保持稳定。（言语僵硬、重复）</p>
+<p class="log-content"><strong>[记录结束]</strong></p>
+<hr>
+<p class="log-title"><span class="prompt">></span> 后续章节及完整档案</p>
+<p class="log-content">（包含第四章至第十章、后日谈、最终数据片段、各组织备忘录等完整内容，因篇幅限制，已整合至终端可滚动加载区域）</p>
+<p class="log-content">> 档案加载完成 | 总字数：12876字 | 访问权限：5级 | 最后更新：2025年10月01日</p>
+<p class="log-content">> 警告：完整档案包含认知污染风险，建议分段阅读并定期进行心理评估</p>
+
+<div class="back-menu" data-target="main">【返回主菜单】</div>
+</div>
+
+<!-- ==================== SITE-119 入职申报 完整内容 ==================== -->
+<div class="content-block" id="entry">
+<div class="onboarding-form">
+<div class="form-header-note">[入职事务]专项博士：永太tonight</div>
+<div class="form-header-note">请凭此证前往设施人事科报道，不服从调剂者将被取消入职资格</div>
+<h1>基金会入职详单</h1>
+<h2>SCP Foundation Onboarding Dossier</h2>
+
+<div style="display:flex; gap:20px; margin-top:15px;">
+<div class="form-table">
+<table>
+<tr><th>可选部门 / Positions</th></tr>
+<tr><td>D级人力资源提供部</td></tr>
+<tr><td>环境卫生清洁科</td></tr>
+<tr><td>D级区域协管队</td></tr>
+<tr><td>后勤餐饮保障处</td></tr>
+<tr><td>紧急医疗服务中心</td></tr>
+<tr><td>S级测试工作站</td></tr>
+<tr><td>E级科研实验室</td></tr>
+<tr><td>K级核心研究所</td></tr>
+<tr><td>科学研究管理办公室</td></tr>
+<tr><td>设施常备安保部</td></tr>
+<tr><td>ERT快速反应小组</td></tr>
+<tr><td>机动特遣队“九尾狐”</td></tr>
+<tr><td>机动特遣队“落锤”</td></tr>
+<tr><td>对外事务联络办公室</td></tr>
+<tr><td>内务安全审查委员部</td></tr>
+<tr><td>设施高级管理层</td></tr>
+</table>
+</div>
+
+<div style="flex:1;">
+<h3>个人基本信息 / Personal Basic information</h3>
+<div class="form-row">
+<div class="form-label">姓名 / Name：</div>
+<div class="form-input"></div>
+</div>
+<div class="form-row">
+<div class="form-label">性别 / Gender：</div>
+<div class="form-input"></div>
+</div>
+<div class="form-row">
+<div class="form-label">出生日期 / DOB：</div>
+<div class="form-input"></div>
+</div>
+<div class="form-row">
+<div class="form-label">国籍 / Nationality：</div>
+<div class="form-input"></div>
+</div>
+<div class="form-row">
+<div class="form-label">学历 / Education：</div>
+<div class="form-input"></div>
+</div>
+<div class="form-row">
+<div class="form-label">院校 / Alma mater：</div>
+<div class="form-input"></div>
+</div>
+<div class="form-row">
+<div class="form-label">联系电话 / Phone：</div>
+<div class="form-input"></div>
+</div>
+<div class="form-row">
+<div class="form-label">电子邮箱 / Email：</div>
+<div class="form-input"></div>
+</div>
+
+<h3>设施简介 / Facility Profile</h3>
+<div class="form-row">
+<div class="form-label">设施名称 / Site Title：</div>
+<div class="form-input">深渊之下</div>
+</div>
+<div class="form-row">
+<div class="form-label">设施代号 / Facility Code：</div>
+<div class="form-input">site-119</div>
+</div>
+<div class="form-row">
+<div class="form-label">设施社群号码 / Number：</div>
+<div class="form-input">1023891047</div>
+</div>
+</div>
+
+<div>
+<div class="form-photo-box"></div>
+<div class="form-qrcode">验证二维码</div>
+</div>
+</div>
+
+<div class="form-footer">Orientation Professor 永太tonight, PhD.</div>
+</div>
+
+<br>
+<div class="back-menu" data-target="main">【返回主菜单】</div>
+<p><span class="prompt">></span> 申报系统退出</p>
+</div>
+
+<!-- 错误页面 -->
+<div class="content-block" id="error">
+<div class="error-screen">
+<div class="big-error-text">错误！！！</div>
+<div class="back-menu" data-target="main">【返回主菜单】</div>
+</div>
+</div>
+
+</div>
+
+<div class="terminal-footer">
+SCIPNET v5.2.1 | 加密：AES-256 | 延迟：12ms | 运行时间：14天8小时22分钟 | 119号基地
+</div>
+</div>
+
+<script>
+const allMenuItems = document.querySelectorAll('.menu-item, .back-menu, .scp-item');
+const contentBlocks = document.querySelectorAll('.content-block');
+
+allMenuItems.forEach(item => {
+    item.addEventListener('click', () => {
+        document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+        if (item.classList.contains('menu-item')) item.classList.add('active');
+        const targetId = item.dataset.target;
+        contentBlocks.forEach(block => block.classList.remove('active'));
+        document.getElementById(targetId).classList.add('active');
+        document.querySelector('.terminal-content').scrollTop = 0;
+    });
+});
+
+// 充值选项点击效果
+const rechargeOptions = document.querySelectorAll('.recharge-option');
+rechargeOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        rechargeOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+    });
+});
+
+setInterval(() => {
+    const cursor = document.getElementById('cursor');
+    if (cursor) cursor.style.opacity = cursor.style.opacity === '0' ? '1' : '0';
+}, 500);
+</script>
+
+</body>
+</html>
