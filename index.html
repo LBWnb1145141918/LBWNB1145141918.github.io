@@ -109,6 +109,13 @@ a{color:#00ffcc;text-decoration:underline;}
   你的浏览器不支持音频播放，请更换浏览器！
 </audio> <!-- 补全闭合标签 -->
 
+<!-- 新增：点击音效音频标签 -->
+<audio id="clickSound" preload="auto">
+  <!-- 使用免费可商用的深海风格音效链接，也可替换为本地文件 -->
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-underwater-bubbles-elegant-814.mp3" type="audio/mpeg">
+  你的浏览器不支持音频播放！
+</audio>
+
 <!-- 音乐控制按钮（置顶显示） -->
 <button id="musicBtn" onclick="toggleMusic()">
   🔊 开启/关闭深渊之声
@@ -124,7 +131,7 @@ a{color:#00ffcc;text-decoration:underline;}
 
 <div class="terminal-content">
 
-<!-- 主菜单（新增充值选项） -->
+<!-- 主菜单（新增充值选项 + 新增已故人员名单） -->
 <div class="content-block active" id="main">
 <p><span class="prompt">></span> 登录成功 - 欢迎来到119号站点 SCIPNET</p>
 <p><span class="prompt">></span> 最后一次日志：2026-03-10 17：00：00（CN-119服务器）</p>
@@ -138,6 +145,8 @@ a{color:#00ffcc;text-decoration:underline;}
 <div class="menu-item" data-target="norbert">• Norbert 计划 // 起源</div>
 <div class="menu-item" data-target="main">• 119号基地人员数据库</div>
 <div class="menu-item" data-target="entry">• SITE-119入职申报</div>
+<!-- 新增：Site-119已故人员名单菜单 -->
+<div class="menu-item" data-target="deceased-list">• Site-119已故人员名单</div>
 
 <!-- 右下角ERROR菜单 -->
 <div style="text-align: right; margin-top: 60px;">
@@ -149,6 +158,29 @@ a{color:#00ffcc;text-decoration:underline;}
 <br>
 <p><span class="prompt">></span> 输入"帮助"以获取命令列表</p>
 <p><span class="prompt">></span> <span id="cursor">_</span></p>
+</div>
+
+<!-- 新增：Site-119已故人员名单页面 -->
+<div class="content-block" id="deceased-list">
+<p><span class="prompt">></span> 正在加载 Site-119 已故人员档案...</p>
+<p><span class="prompt">></span> 档案等级：4级机密 | 访问权限：3级及以上</p>
+<hr>
+<div class="scp-doc">
+<h2 style="color:#00ffff; margin:10px 0;">Site-119 已故人员名单</h2>
+<p style="margin:8px 0;"><strong>更新时间：</strong>2026-03-10</p>
+<p style="margin:8px 0;"><strong>记录总数：</strong>27人</p>
+<hr>
+<p style="margin:5px 0; color:#ffcccc;">1. 罗伯特·莫里斯博士 - 设施主管 - 死因：深渊异常同化</p>
+<p style="margin:5px 0; color:#ffcccc;">2. 莎拉·简宁斯 - 通信技术员 - 死因：精神污染导致自毁</p>
+<p style="margin:5px 0; color:#ffcccc;">3. 本·卡特 - 二级维护工程师 - 死因：管道异常结构吞噬</p>
+<p style="margin:5px 0; color:#ffcccc;">4. 艾伦·威克斯 - 通信专员 - 死因：深海压力异常导致殉职</p>
+<p style="margin:5px 0; color:#ffcccc;">5. 迈尔斯 - 声纳技术员 - 死因：低频噪音引发脑死亡</p>
+<p style="margin:5px 0; color:#ffcccc;">6. 科斯塔主管 - 安保主管 - 死因：收容失效抵抗牺牲</p>
+<p style="margin:5px 0; color:#ffcccc;">7-27. 匿名工作人员 - 死因：Site-119坍塌事故（详情见事故报告编号：119-XK-001）</p>
+<hr>
+<p style="color:#00ccff; font-style:italic;">注：完整死亡报告需5级权限解锁，所有已故人员已按基金会规程完成善后处理</p>
+</div>
+<div class="back-menu" data-target="main">【返回主菜单】</div>
 </div>
 
 <!-- ==================== 充值页面 ==================== -->
@@ -185,7 +217,7 @@ a{color:#00ffcc;text-decoration:underline;}
 <div class="scp-item" data-target="scp-1128">SCP-1128 水中巨物</div>
 <div class="scp-item" data-target="scp-252">SCP-252 拟态沧龙</div>
 </div>
-<div class="back-menu" data-target="main">【返回主菜单】</div>
+<div class="back-menu" data-target="scp-list">【返回SCP列表】</div>
 </div>
 
 <!-- ==================== 带等级颜色的SCP档案 ==================== -->
@@ -595,20 +627,38 @@ function toggleMusic() {
   const music = document.getElementById('bgMusic');
   music.muted = !music.muted;
   if (!music.muted) music.play();
+  // 播放点击音效
+  playClickSound();
+}
+
+// 新增：播放点击音效函数
+function playClickSound() {
+  const clickSound = document.getElementById('clickSound');
+  // 重置音频播放位置，确保每次点击都能播放
+  clickSound.currentTime = 0;
+  clickSound.play().catch(err => {
+    // 处理浏览器自动播放策略限制
+    console.log("音效播放需要用户交互授权：", err);
+  });
 }
 
 // 终端菜单切换逻辑
-const allMenuItems = document.querySelectorAll('.menu-item, .back-menu, .scp-item');
+const allMenuItems = document.querySelectorAll('.menu-item, .back-menu, .scp-item, .recharge-option, .recharge-btn');
 const contentBlocks = document.querySelectorAll('.content-block');
 
 allMenuItems.forEach(item => {
     item.addEventListener('click', () => {
+        // 播放点击音效
+        playClickSound();
+        
         document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
         if (item.classList.contains('menu-item')) item.classList.add('active');
         const targetId = item.dataset.target;
         contentBlocks.forEach(block => block.classList.remove('active'));
-        document.getElementById(targetId).classList.add('active');
-        document.querySelector('.terminal-content').scrollTop = 0;
+        if (targetId) {
+            document.getElementById(targetId).classList.add('active');
+            document.querySelector('.terminal-content').scrollTop = 0;
+        }
     });
 });
 
