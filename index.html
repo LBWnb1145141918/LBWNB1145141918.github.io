@@ -81,25 +81,38 @@ a{color:#00ffcc;text-decoration:underline;}
     animation: glow 1s infinite alternate;
 }
 @keyframes glow{0%{filter:brightness(1);}100%{filter:brightness(1.5);}}
+
+/* ==================== 音乐按钮样式（置顶显示） ==================== */
+#musicBtn {
+    position:fixed !important;
+    bottom:20px !important;
+    right:20px !important;
+    padding:10px 20px !important;
+    background:#000 !important;
+    color:#ff0000 !important;
+    border:1px solid #ff0000 !important;
+    border-radius:5px !important;
+    cursor:pointer !important;
+    font-family:Courier New !important;
+    z-index:9999 !important; /* 置顶显示，不会被覆盖 */
+    box-shadow:0 0 10px #ff0000 !important;
+}
+#musicBtn:hover {
+    background:#222 !important;
+    box-shadow:0 0 15px #ff0000 !important;
+}
 </style>
 </head>
-<body><!-- 背景音乐《来自深渊》 -->
+<body>
+<!-- 背景音乐《来自深渊》- 修复闭合标签 -->
 <audio src="music/来自深渊.mp3" autoplay loop muted id="bgMusic">
   你的浏览器不支持音频播放，请更换浏览器！
+</audio> <!-- 补全闭合标签 -->
 
-<!-- 播放/暂停按钮 -->
-<button onclick="toggleMusic()" style="position:fixed;bottom:20px;right:20px;padding:10px 20px;background:#222;color:#fff;border:none;border-radius:5px;cursor:pointer;">
+<!-- 音乐控制按钮（置顶显示） -->
+<button id="musicBtn" onclick="toggleMusic()">
   🔊 开启/关闭深渊之声
 </button>
-
-<script>
-  // 点击按钮切换播放状态
-  function toggleMusic() {
-    const music = document.getElementById('bgMusic');
-    music.muted = !music.muted;
-    if (!music.muted) music.play();
-  }
-</script>
 
 <div class="terminal-header">
 <div class="header-left">SCIPNET终端V2 - SITE-119</div>
@@ -577,6 +590,14 @@ SCIPNET v5.2.1 | 加密：AES-256 | 延迟：12ms | 运行时间：14天8小时2
 </div>
 
 <script>
+// 音乐控制函数
+function toggleMusic() {
+  const music = document.getElementById('bgMusic');
+  music.muted = !music.muted;
+  if (!music.muted) music.play();
+}
+
+// 终端菜单切换逻辑
 const allMenuItems = document.querySelectorAll('.menu-item, .back-menu, .scp-item');
 const contentBlocks = document.querySelectorAll('.content-block');
 
@@ -600,6 +621,7 @@ rechargeOptions.forEach(option => {
     });
 });
 
+// 光标闪烁效果
 setInterval(() => {
     const cursor = document.getElementById('cursor');
     if (cursor) cursor.style.opacity = cursor.style.opacity === '0' ? '1' : '0';
