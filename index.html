@@ -7,8 +7,8 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Consolas','Courier New',monospace;}
-body{background-color:#091219;background-image:linear-gradient(rgba(0,15,20,0.8)1px,transparent 1px),linear-gradient(90deg,rgba(0,15,20,0.8)1px,transparent 1px);background-size:25px 25px;color:#00ffff;overflow-y:hidden;height:100vh;position:relative;}
-/* 背景 Logo 样式 */
+body{background-color:#091219;background-image:linear-gradient(rgba(0,15,20,0.8)1px,transparent 1px),linear-gradient(90deg,rgba(0,15,20,0.8)1px,transparent 1px);background-size:25px 25px;color:#00ffff;overflow-y:auto;height:100vh;position:relative;}
+/* 背景 Logo 样式 - 简化动画 */
 .terminal-bg-logo {
     position: absolute;
     top: 50%;
@@ -17,35 +17,15 @@ body{background-color:#091219;background-image:linear-gradient(rgba(0,15,20,0.8)
     width: 60%;
     max-width: 600px;
     height: auto;
-    opacity: 0.25;
+    opacity: 0.2;
     z-index: 0;
     pointer-events: none;
-    /* 背景色与终端页面一致 */
     background-color: #091219;
-    /* 添加背景网格纹理，与终端页面匹配 */
-    background-image: 
-        linear-gradient(rgba(0,15,20,0.8) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,15,20,0.8) 1px, transparent 1px);
-    background-size: 25px 25px;
-    /* 柔化边缘，让过渡更自然 */
     border-radius: 10px;
-    box-shadow: 0 0 50px rgba(0, 255, 204, 0.3);
-    /* 优化显示效果 */
-    mix-blend-mode: normal;
-    filter: drop-shadow(0 0 25px rgba(0, 255, 204, 0.4)) 
-            brightness(1.3) 
-            contrast(1.1);
-    animation: logoGlow 4s ease-in-out infinite;
-}
-@keyframes logoGlow {
-    0%, 100% { 
-        opacity: 0.25; 
-        filter: drop-shadow(0 0 25px rgba(0, 255, 204, 0.4)) brightness(1.3) contrast(1.1);
-    }
-    50% { 
-        opacity: 0.35; 
-        filter: drop-shadow(0 0 35px rgba(0, 255, 204, 0.6)) brightness(1.5) contrast(1.2);
-    }
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+    filter: drop-shadow(0 0 15px rgba(0, 255, 204, 0.2));
+    /* 移除动画，减少性能消耗 */
+    animation: none;
 }
 .terminal-header{background-color:rgba(0,26,26,0.8);border-bottom:1px solid #00ffff;padding:8px 20px;display:flex;justify-content:space-between;align-items:center;font-size:16px;text-shadow:0 0 5px #00ffff;position:relative;z-index:1;}
 .header-left{color:#00ffff;}
@@ -320,114 +300,38 @@ a{color:#00ffcc;text-decoration:underline;}
     align-items: center;
 }
 
-/* 点击特效样式 - 深海华丽风格 */
+/* 点击特效样式 - 简化版 */
 .click-effect {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: radial-gradient(circle, rgba(0,255,255,1) 0%, rgba(0,200,255,0.8) 40%, rgba(0,150,255,0.4) 100%);
-    border-radius: 50%;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    animation: deepSeaBubble 1s ease-out forwards;
-    z-index: 9999;
-    box-shadow: 
-        0 0 15px rgba(0, 255, 255, 1),
-        0 0 30px rgba(0, 200, 255, 0.8),
-        0 0 45px rgba(0, 150, 255, 0.6),
-        inset 0 0 15px rgba(255, 255, 255, 0.8),
-        inset 0 0 30px rgba(0, 255, 255, 0.5);
-}
-@keyframes deepSeaBubble {
-    0% {
-        width: 8px;
-        height: 8px;
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1) rotate(0deg);
-    }
-    100% {
-        width: 120px;
-        height: 120px;
-        opacity: 0;
-        transform: translate(-50%, -180%) scale(2) rotate(180deg);
-    }
-}
-
-/* 点击特效 - 多层水泡（主水泡） */
-.click-effect::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,255,255,0.9) 0%, rgba(0,180,255,0.6) 50%, transparent 100%);
-    animation: bubbleLayer1 1s ease-out forwards;
-    width: 100%;
-    height: 100%;
-    box-shadow: 
-        0 0 20px rgba(0, 255, 255, 0.8),
-        0 0 40px rgba(0, 200, 255, 0.6);
-}
-
-/* 点击特效 - 内层水泡 */
-.click-effect::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(0,255,255,0.7) 40%, transparent 100%);
-    animation: bubbleLayer2 1s ease-out forwards;
-    width: 50%;
-    height: 50%;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 1);
-}
-
-@keyframes bubbleLayer1 {
-    0% {
-        opacity: 0.9;
-        transform: translate(-50%, -50%) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -200%) scale(2.5);
-    }
-}
-
-@keyframes bubbleLayer2 {
-    0% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -150%) scale(3);
-    }
-}
-
-/* 额外的小水泡 - 使用 JavaScript 动态添加 */
-.click-effect .mini-bubble {
     position: absolute;
     width: 6px;
     height: 6px;
     background: radial-gradient(circle, rgba(0,255,255,0.8) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
-    animation: miniBubbleFloat 0.8s ease-out forwards;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+    transform: translate(-50%, -50%);
+    animation: deepSeaBubble 0.6s ease-out forwards;
+    z-index: 9999;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
 }
-@keyframes miniBubbleFloat {
+@keyframes deepSeaBubble {
     0% {
+        width: 6px;
+        height: 6px;
         opacity: 1;
-        transform: translate(0, 0) scale(1);
+        transform: translate(-50%, -50%) scale(1);
     }
     100% {
+        width: 60px;
+        height: 60px;
         opacity: 0;
-        transform: translate(var(--tx), var(--ty)) scale(0.5);
+        transform: translate(-50%, -100%) scale(1.5);
     }
 }
+
+/* 移除多层水泡效果，减少性能消耗 */
+/* .click-effect::before - 已移除 */
+/* .click-effect::after - 已移除 */
+/* 小水泡 - 已移除 */
 </style>
 </head>
 <body>
@@ -1403,44 +1307,19 @@ function playClickSound() {
   // console.log('音效播放（已移除）');
 }
 
-// 新增：创建点击特效
+// 新增：创建点击特效 - 简化版
 function createClickEffect(x, y) {
-  // 创建主水泡
+  // 只创建主水泡，移除小水泡，减少性能消耗
   const ripple = document.createElement('div');
   ripple.className = 'click-effect';
   ripple.style.left = x + 'px';
   ripple.style.top = y + 'px';
   document.body.appendChild(ripple);
   
-  // 添加多个小水泡，向四周扩散
-  const miniBubblesCount = 6; // 小水泡数量
-  for (let i = 0; i < miniBubblesCount; i++) {
-    const angle = (360 / miniBubblesCount) * i;
-    const distance = 30 + Math.random() * 20; // 随机距离
-    const tx = Math.cos(angle * Math.PI / 180) * distance;
-    const ty = Math.sin(angle * Math.PI / 180) * distance - 20; // 向上偏移
-    
-    const miniBubble = document.createElement('div');
-    miniBubble.className = 'mini-bubble';
-    miniBubble.style.setProperty('--tx', `${tx}px`);
-    miniBubble.style.setProperty('--ty', `${ty}px`);
-    miniBubble.style.left = x + 'px';
-    miniBubble.style.top = y + 'px';
-    miniBubble.style.animationDelay = `${Math.random() * 0.1}s`; // 随机延迟
-    document.body.appendChild(miniBubble);
-    
-    setTimeout(() => {
-      miniBubble.remove();
-    }, 800);
-  }
-  
   // 动画结束后移除元素
   setTimeout(() => {
     ripple.remove();
-  }, 1000);
-  
-  // 创建全屏闪光效果（可选，根据需要启用）
-  // createFlashEffect();
+  }, 600);
 }
 
 // 创建全屏闪光效果
