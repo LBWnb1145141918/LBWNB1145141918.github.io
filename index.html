@@ -1217,9 +1217,14 @@ window.loginWithSteam = function() {
 window.loginAsGuest = async function() {
   playClickSound();
   
+  console.log('API_BASE:', API_BASE);
+  
   const guestName = prompt('请输入您的访客昵称（可选）:', '访客_' + Math.random().toString(36).substr(2, 6));
   
+  if (!guestName) return;
+  
   try {
+    console.log('发送访客登录请求...');
     const response = await fetch(`${API_BASE}/auth/guest`, {
       method: 'POST',
       headers: {
