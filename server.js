@@ -2,11 +2,16 @@ const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
 const SteamStrategy = require('passport-steam').Strategy;
-const OpenID = require('openid').OpenID;
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
+
+// 加载环境变量（Vercel 会自动处理）
+try {
+  require('dotenv').config();
+} catch (e) {
+  // Vercel 环境不需要 dotenv
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -67,10 +72,8 @@ passport.use(new SteamStrategy({
   returnURL: `${BASE_URL}/auth/steam/return`,
   realm: BASE_URL,
   apiKey: process.env.STEAM_API_KEY,
-  // 使用 Steam OpenID 2.0 端点
   profile: true
 }, function(identifier, profile, done) {
-  // 用户验证成功后保存到数据库
   const userData = {
     steamId: profile.id,
     username: profile.username,
@@ -79,7 +82,6 @@ passport.use(new SteamStrategy({
     profileUrl: profile.profileUrl
   };
 
-  // 更新或插入用户
   const sql = `INSERT INTO users (steamId, username, displayName, avatar, profileUrl, lastLogin, loginCount)
     VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, COALESCE((SELECT loginCount FROM users WHERE steamId = ?), 0) + 1)
     ON CONFLICT(steamId) DO UPDATE SET
@@ -103,18 +105,13 @@ passport.use(new SteamStrategy({
 }));
 
 // ==================== 中间件 ====================
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
-}));
-
 app.use(session({
   secret: process.env.SESSION_SECRET || 'scp-foundation-secret-key',
   resave: true,
   saveUninitialized: true,
   cookie: { 
-    secure: false, // 生产环境改为 true
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 天
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 60 * 60 * 1000
   }
 }));
 
@@ -166,7 +163,6 @@ app.post('/api/auth/guest', express.json(), (req, res) => {
   const guestName = req.body.guestName || `访客_${Math.random().toString(36).substr(2, 9)}`;
   const guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
-  // 保存访客到数据库
   db.run(`
     INSERT INTO guest_users (guestId, displayName)
     VALUES (?, ?)
@@ -176,7 +172,6 @@ app.post('/api/auth/guest', express.json(), (req, res) => {
       return res.status(500).json({ error: '保存访客失败' });
     }
 
-    // 设置会话
     req.session.guestId = guestId;
     req.session.guestName = guestName;
 
@@ -210,7 +205,6 @@ app.get('/api/user/info', (req, res) => {
   }
 
   if (req.isAuthenticated()) {
-    // Steam 用户
     db.get('SELECT * FROM users WHERE steamId = ?', [req.user.steamId], (err, user) => {
       if (err) {
         return res.status(500).json({ error: '查询失败' });
@@ -218,7 +212,6 @@ app.get('/api/user/info', (req, res) => {
       res.json(user);
     });
   } else {
-    // 访客
     db.get('SELECT * FROM guest_users WHERE guestId = ?', [req.session.guestId], (err, user) => {
       if (err) {
         return res.status(500).json({ error: '查询失败' });
@@ -245,9 +238,17 @@ app.post('/api/guest/active', express.json(), (req, res) => {
   });
 });
 
-// ==================== 启动服务器 ====================
-app.listen(PORT, () => {
-  console.log(`
+// ==================== Vercel Serverless 导出 ====================
+// Vercel 使用 module.exports 导出 app
+if (process.env.VERCEL === '1' || process.env.NODE_ENV === 'production') {
+  module.exports = app;
+}
+
+// ==================== 本地环境启动服务器 ====================
+// 仅在本地开发环境启动服务器
+if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`
   ╔════════════════════════════════════════════════════════╗
   ║                                                        ║
   ║   SCP Foundation Terminal Backend                      ║
@@ -255,16 +256,17 @@ app.listen(PORT, () => {
   ║                                                        ║
      服务器运行在：http://localhost:${PORT}                  ║
   ║   数据库：${process.env.DATABASE_PATH || './database.sqlite'}           ║
-  ║                                                        ║
+                                                          ║
      按 Ctrl+C 停止服务器                                  ║
   ║                                                        ║
   ════════════════════════════════════════════════════════╝
   `);
-});
+  });
 
-// 优雅关闭
-process.on('SIGINT', () => {
-  console.log('\n正在关闭服务器...');
-  db.close();
-  process.exit(0);
-});
+  // 优雅关闭
+  process.on('SIGINT', () => {
+    console.log('\n正在关闭服务器...');
+    db.close();
+    process.exit(0);
+  });
+}
