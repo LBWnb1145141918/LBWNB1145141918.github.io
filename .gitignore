@@ -27,3 +27,6 @@ build/
 *.swp
 *.swo
 *~
+
+# 部署临时文件
+temp_status.txt
