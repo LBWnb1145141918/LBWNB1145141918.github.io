@@ -417,7 +417,7 @@ a{color:#00ffcc;text-decoration:underline;}
 <!-- 左上角往下一点的充值选项 -->
 <div class="menu-item" data-target="recharge" style="margin-top:10px;">• 充值</div>
 <div class="menu-item" data-target="scp-list">• SITE-119 SCP档案</div>
-<div class="menu-item" data-target="main">• SITE-119工程资料报表</div>
+<div class="menu-item" data-target="engineering">• SITE-119 工程资料报表</div>
 <div class="menu-item" data-target="norbert">• Norbert 计划 // 起源</div>
 <div class="menu-item" data-target="main">• 119号基地人员数据库</div>
 <div class="menu-item" data-target="entry">• SITE-119 入职申报</div>
@@ -503,6 +503,82 @@ a{color:#00ffcc;text-decoration:underline;}
 <p style="color:#00ccff; font-style:italic;">注：点击任意职位卡片查看详细信息 | 所有人员均按基金会规程完成登记备案</p>
 </div>
 <div class="back-menu" data-target="main">【返回主菜单】</div>
+</div>
+
+<!-- ==================== SITE-119 工程资料报表 ==================== -->
+<div class="content-block" id="engineering">
+  <p><span class="prompt">></span> 正在加载 SITE-119 工程资料报表...</p>
+  <p><span class="prompt">></span> 档案等级：<span style="color:#ff3333; font-weight:bold;">公开</span> | 访问权限：所有人员</p>
+  <hr style="border-color:#008888;">
+  
+  <h2 style="color:#00ffff; text-align:center; margin:30px 0; font-size:28px; text-shadow:0 0 10px #00ffff;">
+    🔧 SITE-119 重收深渊区设计图 🔧
+  </h2>
+  
+  <div style="margin:20px 0;">
+    <p style="color:#00ccff; font-style:italic; text-align:center; margin-bottom:30px;">
+      以下是深渊重收区域的完整设计图纸，包含模块结构、入口设计、电梯区域、电站及起重机系统
+    </p>
+  </div>
+  
+  <!-- 设计图展示 -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(400px, 1fr)); gap:20px; margin:30px 0;">
+    <div style="background-color:rgba(0,30,40,0.4); border:2px solid #008888; padding:15px; border-radius:8px;">
+      <h3 style="color:#00ffcc; margin-bottom:10px;">📐 设计图 1 - 模块结构与入口</h3>
+      <img src="static/design-1.jpg" alt="设计图 1 - 模块结构与入口" style="width:100%; border-radius:4px; cursor:pointer;" onclick="viewImage('static/design-1.jpg')">
+      <p style="color:#00ccff; font-size:14px; margin-top:10px;">模块结构设计、入口平面图</p>
+    </div>
+    
+    <div style="background-color:rgba(0,30,40,0.4); border:2px solid #008888; padding:15px; border-radius:8px;">
+      <h3 style="color:#00ffcc; margin-bottom:10px;">📐 设计图 2 - 电梯区域详细设计</h3>
+      <img src="static/design-2.jpg" alt="设计图 2 - 电梯区域详细设计" style="width:100%; border-radius:4px; cursor:pointer;" onclick="viewImage('static/design-2.jpg')">
+      <p style="color:#00ccff; font-size:14px; margin-top:10px;">电梯区域、通道接口、八角模块</p>
+    </div>
+    
+    <div style="background-color:rgba(0,30,40,0.4); border:2px solid #008888; padding:15px; border-radius:8px;">
+      <h3 style="color:#00ffcc; margin-bottom:10px;">📐 设计图 3 - 电站与研究中心</h3>
+      <img src="static/design-3.jpg" alt="设计图 3 - 电站与研究中心" style="width:100%; border-radius:4px; cursor:pointer;" onclick="viewImage('static/design-3.jpg')">
+      <p style="color:#00ccff; font-size:14px; margin-top:10px;">电站结构、研究中心、维护中心</p>
+    </div>
+    
+    <div style="background-color:rgba(0,30,40,0.4); border:2px solid #008888; padding:15px; border-radius:8px;">
+      <h3 style="color:#00ffcc; margin-bottom:10px;">📐 设计图 4 - 操作终端与对接站</h3>
+      <img src="static/design-4.jpg" alt="设计图 4 - 操作终端与对接站" style="width:100%; border-radius:4px; cursor:pointer;" onclick="viewImage('static/design-4.jpg')">
+      <p style="color:#00ccff; font-size:14px; margin-top:10px;">操作终端、驱动电机、底部对接站</p>
+    </div>
+    
+    <div style="background-color:rgba(0,30,40,0.4); border:2px solid #008888; padding:15px; border-radius:8px;">
+      <h3 style="color:#00ffcc; margin-bottom:10px;">📐 设计图 5 - 起重机系统</h3>
+      <img src="static/design-5.jpg" alt="设计图 5 - 起重机系统" style="width:100%; border-radius:4px; cursor:pointer;" onclick="viewImage('static/design-5.jpg')">
+      <p style="color:#00ccff; font-size:14px; margin-top:10px;">起重机设计、电梯对接点、缓冲系统</p>
+    </div>
+  </div>
+  
+  <hr style="border-color:#008888; margin:30px 0;">
+  
+  <div style="background-color:rgba(0,40,50,0.3); border-left:4px solid #00ffcc; padding:15px; margin:20px 0;">
+    <p style="color:#00ffcc; margin:5px 0;"><strong>📋 设计说明：</strong></p>
+    <ul style="color:#00ccff; margin:10px 0; padding-left:20px;">
+      <li>所有模块均采用标准化设计，便于快速组装和维护</li>
+      <li>电梯区域深入地下 15-25 米，配备多重安全系统</li>
+      <li>电站利用海底火山热能发电，提供持续能源</li>
+      <li>起重机系统用于物资运输和模块维护</li>
+      <li>所有设计符合基金会 Site-119 安全标准</li>
+    </ul>
+  </div>
+  
+  <p style="color:#00ccff; font-style:italic; text-align:center; margin-top:30px;">
+    点击任意设计图可查看大图 | 图纸版本：V4.0 | 更新日期：2026-03-10
+  </p>
+</div>
+<div class="back-menu" data-target="main">【返回主菜单】</div>
+
+<!-- 图片查看器模态框 -->
+<div id="imageViewer" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.95); z-index:10000;" onclick="closeImageViewer()">
+  <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); max-width:90%; max-height:90%;">
+    <img id="imageViewerImg" src="" alt="大图查看" style="max-width:100%; max-height:90vh; border:2px solid #00ffcc;">
+    <p style="text-align:center; color:#00ffff; margin-top:20px; font-size:14px;">点击任意位置关闭</p>
+  </div>
 </div>
 
 <!-- ==================== 深渊社区 ==================== -->
@@ -1237,6 +1313,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }, 1000); // 延迟 1 秒加载二维码
 });
+
+// 图片查看器函数
+function viewImage(imageSrc) {
+  const viewer = document.getElementById('imageViewer');
+  const viewerImg = document.getElementById('imageViewerImg');
+  viewerImg.src = imageSrc;
+  viewer.style.display = 'block';
+  console.log('查看大图:', imageSrc);
+}
+
+function closeImageViewer() {
+  const viewer = document.getElementById('imageViewer');
+  viewer.style.display = 'none';
+  console.log('关闭大图查看');
+}
 
 // 音乐控制面板函数
 let isMusicMuted = false;
