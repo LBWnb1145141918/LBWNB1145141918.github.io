@@ -1217,26 +1217,40 @@ window.loginWithSteam = function() {
 window.loginAsGuest = async function() {
   playClickSound();
   
+  console.log('=== 访客登录开始 ===');
   console.log('API_BASE:', API_BASE);
   
-  const guestName = prompt('请输入您的访客昵称（可选）:', '访客_' + Math.random().toString(36).substr(2, 6));
-  
-  if (!guestName) return;
-  
   try {
-    console.log('发送访客登录请求...');
+    const guestName = prompt('请输入您的访客昵称（可选）:', '访客_' + Math.random().toString(36).substr(2, 6));
+    
+    console.log('用户输入的昵称:', guestName);
+    
+    if (!guestName) {
+      console.log('用户取消了输入');
+      return;
+    }
+    
+    console.log('发送请求到:', `${API_BASE}/auth/guest`);
+    
     const response = await fetch(`${API_BASE}/auth/guest`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        guestName: guestName || `访客_${Math.random().toString(36).substr(2, 6)}`
+        guestName: guestName
       }),
       credentials: 'include'
     });
     
+    console.log('响应状态码:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP 错误：${response.status}`);
+    }
+    
     const data = await response.json();
+    console.log('服务器响应:', data);
     
     if (data.success) {
       currentUser = {
@@ -1251,13 +1265,17 @@ window.loginAsGuest = async function() {
       updateGuestActivity();
       setInterval(updateGuestActivity, 5 * 60 * 1000);
       
+      console.log('登录成功，切换页面...');
       showContent('main');
     } else {
+      console.error('登录失败:', data.error);
       alert('访客登录失败：' + (data.error || '未知错误'));
     }
   } catch (error) {
-    console.error('访客登录失败:', error);
-    alert('连接服务器失败，请确保后端服务正在运行');
+    console.error('=== 访客登录错误 ===');
+    console.error('错误详情:', error);
+    console.error('错误堆栈:', error.stack);
+    alert('连接服务器失败：' + error.message + '\n\n请检查:\n1. 网络连接是否正常\n2. 后端服务是否运行');
   }
 };
 
