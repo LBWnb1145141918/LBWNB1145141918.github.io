@@ -15,13 +15,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ==================== CORS 配置 ====================
-app.use(cors({
-  origin: function(origin, callback) {
-    // 允许所有来源（生产环境）
-    return callback(null, true);
-  },
-  credentials: true
-}));
+// 允许所有来源（生产环境）
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // 处理预检请求
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // ==================== 数据库初始化 ====================
 // Vercel Serverless 环境使用内存数据库，避免文件 IO 延迟
