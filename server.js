@@ -58,9 +58,14 @@ passport.deserializeUser((user, done) => {
 });
 
 // Steam OpenID 策略
+// Vercel 环境使用生产域名，本地环境使用 localhost
+const BASE_URL = process.env.VERCEL === '1' 
+  ? 'https://scp-terminal-backend.vercel.app' 
+  : `http://localhost:${PORT}`;
+
 passport.use(new SteamStrategy({
-  returnURL: `http://localhost:${PORT}/auth/steam/return`,
-  realm: `http://localhost:${PORT}/`,
+  returnURL: `${BASE_URL}/auth/steam/return`,
+  realm: BASE_URL,
   apiKey: process.env.STEAM_API_KEY,
   // 使用 Steam OpenID 2.0 端点
   profile: true
