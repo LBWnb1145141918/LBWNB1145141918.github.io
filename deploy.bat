@@ -1,33 +1,84 @@
-#!/bin/bash
-# 快速部署脚本 - 自动提交并推送到 GitHub Pages
+@echo off
+chcp 65001 >nul
+cd /d "%~dp0"
 
-# 检查是否有未提交的更改
-if git diff --quiet && git diff --staged --quiet; then
-    echo "✓ 工作区干净，无需提交"
-else
-    echo "📝 检测到更改..."
-    
-    # 添加所有更改
+echo ======================================
+echo   SCP 终端 - 快速部署工具
+echo ======================================
+echo.
+
+REM 检查 Git 是否可用
+git --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ❌ 错误：未安装 Git，请先安装 Git
+    pause
+    exit /b 1
+)
+echo ✓ Git 已安装
+
+echo.
+echo 📊 检查仓库状态...
+
+REM 检查是否有更改
+git status --porcelain > temp_status.txt
+if %errorlevel% neq 0 (
+    echo ❌ Git 状态检查失败
+    del temp_status.txt
+    pause
+    exit /b 1
+)
+
+for %%a in (temp_status.txt) do set "filesize=%%~za"
+if %filesize% equ 0 (
+    echo ✓ 工作区干净，无需提交
+    del temp_status.txt
+) else (
+    echo 📝 检测到更改，正在添加...
     git add .
     
-    # 获取当前时间作为提交信息
-    COMMIT_MSG="自动部署: $(date '+%Y-%m-%d %H:%M:%S')"
+    for /f "tokens=2 delims==" %%i in ('wmic os get localdatetime /value') do set "dt=%%i"
+    set "YEAR=%dt:~0,4%"
+    set "MONTH=%dt:~4,2%"
+    set "DAY=%dt:~6,2%"
+    set "HOUR=%dt:~8,2%"
+    set "MIN=%dt:~10,2%"
     
-    # 提交更改
-    git commit -m "$COMMIT_MSG"
+    set "commitMsg=自动部署：%YEAR%-%MONTH%-%DAY% %HOUR%:%MIN%"
+    echo 💾 提交更改...
+    git commit -m "%commitMsg%"
     
-    echo "✓ 已提交：$COMMIT_MSG"
-fi
+    if %errorlevel% equ 0 (
+        echo ✓ 已提交：%commitMsg%
+    ) else (
+        echo ❌ 提交失败
+        del temp_status.txt
+        pause
+        exit /b 1
+    )
+    del temp_status.txt
+)
 
-# 推送到 GitHub
-echo "🚀 正在推送到 GitHub..."
+echo.
+echo 🚀 正在推送到 GitHub...
 git push origin main
 
-if [ $? -eq 0 ]; then
-    echo "✅ 推送成功！"
-    echo "⏳ GitHub Pages 正在部署中..."
-    echo "📱 访问：https://lbwnb1145141918.github.io"
-    echo "⏱️  部署完成后约需 1-2 分钟"
-else
-    echo "❌ 推送失败，请检查网络连接"
-fi
+if %errorlevel% equ 0 (
+    echo.
+    echo ======================================
+    echo   ✅ 部署成功！
+    echo ======================================
+    echo.
+    echo ⏳ GitHub Pages 正在自动部署中...
+    echo 📱 访问地址：https://lbwnb1145141918.github.io
+    echo ⏱️  部署完成约需 1-2 分钟
+    echo.
+    echo 🔍 查看部署进度：
+    echo https://github.com/LBWnb1145141918/LBWNB1145141918.github.io/actions
+    echo.
+) else (
+    echo.
+    echo ❌ 推送失败，请检查网络连接
+    echo 如果持续失败，请尝试手动执行：git push origin main
+)
+
+pause
