@@ -1,7 +1,5 @@
 const express = require('express');
 const session = require('express-session');
-const passport = require('passport');
-const SteamStrategy = require('passport-steam').Strategy;
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const path = require('path');
@@ -28,22 +26,8 @@ const isVercel = process.env.VERCEL === '1';
 const dbPath = isVercel ? ':memory:' : (process.env.DATABASE_PATH || './database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
-// 创建用户表（Vercel 环境每次部署都是新的）
+// 创建访客表
 db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-      steamId TEXT PRIMARY KEY,
-      username TEXT,
-      displayName TEXT,
-      avatar TEXT,
-      profileUrl TEXT,
-      firstLogin DATETIME DEFAULT CURRENT_TIMESTAMP,
-      lastLogin DATETIME DEFAULT CURRENT_TIMESTAMP,
-      loginCount INTEGER DEFAULT 1,
-      isGuest INTEGER DEFAULT 0
-    )
-  `);
-
   db.run(`
     CREATE TABLE IF NOT EXISTS guest_users (
       guestId TEXT PRIMARY KEY,
@@ -58,57 +42,6 @@ db.serialize(() => {
   }
 });
 
-// ==================== Passport 配置 ====================
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
-
-// Steam OpenID 策略
-// Vercel 环境使用生产域名，本地环境使用 localhost
-const BASE_URL = process.env.VERCEL === '1' 
-  ? 'https://scp-terminal-backend.vercel.app' 
-  : `http://localhost:${PORT}`;
-
-passport.use(new SteamStrategy({
-  returnURL: `${BASE_URL}/auth/steam/return`,
-  realm: BASE_URL,
-  apiKey: process.env.STEAM_API_KEY,
-  profile: true
-}, function(identifier, profile, done) {
-  const userData = {
-    steamId: profile.id,
-    username: profile.username,
-    displayName: profile.displayName,
-    avatar: profile.photos[2]?.value || profile.photos[1]?.value || profile.photos[0]?.value,
-    profileUrl: profile.profileUrl
-  };
-
-  const sql = `INSERT INTO users (steamId, username, displayName, avatar, profileUrl, lastLogin, loginCount)
-    VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, COALESCE((SELECT loginCount FROM users WHERE steamId = ?), 0) + 1)
-    ON CONFLICT(steamId) DO UPDATE SET
-      displayName = excluded.displayName,
-      avatar = excluded.avatar,
-      profileUrl = excluded.profileUrl,
-      lastLogin = CURRENT_TIMESTAMP,
-      loginCount = loginCount + 1`;
-  
-  db.run(sql, [
-    userData.steamId,
-    userData.username,
-    userData.displayName,
-    userData.avatar,
-    userData.profileUrl,
-    userData.steamId
-  ], function(err) {
-    if (err) return done(err);
-    return done(null, userData);
-  });
-}));
-
 // ==================== 中间件 ====================
 app.use(session({
   secret: process.env.SESSION_SECRET || 'scp-foundation-secret-key',
@@ -120,9 +53,6 @@ app.use(session({
   }
 }));
 
-app.use(passport.initialize());
-app.use(passport.session());
-
 // 静态文件服务
 app.use(express.static(path.join(__dirname)));
 
@@ -130,13 +60,7 @@ app.use(express.static(path.join(__dirname)));
 
 // 检查登录状态
 app.get('/api/auth/status', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json({
-      loggedIn: true,
-      user: req.user,
-      isGuest: false
-    });
-  } else if (req.session.guestId) {
+  if (req.session.guestId) {
     res.json({
       loggedIn: true,
       user: {
@@ -151,16 +75,6 @@ app.get('/api/auth/status', (req, res) => {
       loggedIn: false
     });
   }
-});
-
-// Steam 登录
-app.get('/api/auth/steam', passport.authenticate('steam'));
-
-// Steam 回调
-app.get('/auth/steam/return', passport.authenticate('steam', {
-  failureRedirect: '/login'
-}), (req, res) => {
-  res.redirect('/');
 });
 
 // 访客登录
@@ -198,40 +112,26 @@ app.post('/api/auth/guest', express.json(), (req, res) => {
 
 // 退出登录
 app.post('/api/auth/logout', (req, res) => {
-  req.logout((err) => {
+  req.session.destroy((err) => {
     if (err) {
-      return res.status(500).json({ error: '退出失败' });
+      return res.status(500).json({ error: '清除会话失败' });
     }
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ error: '清除会话失败' });
-      }
-      res.json({ success: true });
-    });
+    res.json({ success: true });
   });
 });
 
 // 获取用户信息
 app.get('/api/user/info', (req, res) => {
-  if (!req.isAuthenticated() && !req.session.guestId) {
+  if (!req.session.guestId) {
     return res.status(401).json({ error: '未登录' });
   }
 
-  if (req.isAuthenticated()) {
-    db.get('SELECT * FROM users WHERE steamId = ?', [req.user.steamId], (err, user) => {
-      if (err) {
-        return res.status(500).json({ error: '查询失败' });
-      }
-      res.json(user);
-    });
-  } else {
-    db.get('SELECT * FROM guest_users WHERE guestId = ?', [req.session.guestId], (err, user) => {
-      if (err) {
-        return res.status(500).json({ error: '查询失败' });
-      }
-      res.json(user);
-    });
-  }
+  db.get('SELECT * FROM guest_users WHERE guestId = ?', [req.session.guestId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: '查询失败' });
+    }
+    res.json(user);
+  });
 });
 
 // 更新访客活跃时间
