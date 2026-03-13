@@ -23,9 +23,12 @@ app.use(cors({
 }));
 
 // ==================== 数据库初始化 ====================
-const db = new sqlite3.Database(process.env.DATABASE_PATH || './database.sqlite');
+// Vercel Serverless 环境使用内存数据库，避免文件 IO 延迟
+const isVercel = process.env.VERCEL === '1';
+const dbPath = isVercel ? ':memory:' : (process.env.DATABASE_PATH || './database.sqlite');
+const db = new sqlite3.Database(dbPath);
 
-// 创建用户表
+// 创建用户表（Vercel 环境每次部署都是新的）
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
@@ -50,7 +53,9 @@ db.serialize(() => {
     )
   `);
 
-  console.log('数据库初始化完成');
+  if (!isVercel) {
+    console.log('数据库初始化完成');
+  }
 });
 
 // ==================== Passport 配置 ====================
