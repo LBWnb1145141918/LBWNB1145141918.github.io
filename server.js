@@ -16,7 +16,10 @@ const PORT = process.env.PORT || 3000;
 
 // ==================== CORS 配置 ====================
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://lbwnb1145141918.github.io'],
+  origin: function(origin, callback) {
+    // 允许所有来源（生产环境）
+    return callback(null, true);
+  },
   credentials: true
 }));
 
