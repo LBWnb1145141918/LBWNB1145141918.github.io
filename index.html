@@ -339,8 +339,8 @@ a{color:#00ffcc;text-decoration:underline;}
 </style>
 </head>
 <body>
-<!-- 背景音乐《来自深渊》- 移除 muted 属性 -->
-<audio src="music/来自深渊.mp3" autoplay loop id="bgMusic">
+<!-- 背景音乐《来自深渊》- 添加 preload 和 muted 以优化加载 -->
+<audio src="music/来自深渊.mp3" preload="auto" loop id="bgMusic" muted>
   你的浏览器不支持音频播放，请更换浏览器！
 </audio>
 
@@ -1196,11 +1196,19 @@ async function updateGuestActivity() {
   }
 }
 
-// 页面加载时直接显示主菜单（已移除登录功能）+ 图片懒加载
+// 页面加载时直接显示主菜单（已移除登录功能）+ 图片懒加载 + 音乐预加载
 document.addEventListener('DOMContentLoaded', function() {
   console.log('=== SCP 终端已加载 ===');
   console.log('用户：匿名访客');
   console.log('模式：访客模式（无需登录）');
+  
+  // 预加载背景音乐
+  const bgMusic = document.getElementById('bgMusic');
+  if (bgMusic) {
+    // 强制浏览器预加载音频
+    bgMusic.load();
+    console.log('背景音乐开始预加载');
+  }
   
   // 懒加载背景 Logo
   const bgLogo = document.querySelector('.terminal-bg-logo');
@@ -1462,6 +1470,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const bgMusic = document.getElementById('bgMusic');
     if (bgMusic) {
         bgMusic.volume = 0.5; // 设置默认音量 50%
+        
+        // 移除 muted 属性，准备播放
+        bgMusic.muted = false;
+        
         bgMusic.play().then(() => {
             console.log('背景音乐自动播放成功');
             isMusicMuted = false;
