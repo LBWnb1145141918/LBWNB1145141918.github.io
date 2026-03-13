@@ -1183,7 +1183,14 @@ window.checkLoginStatus = async function() {
 
 // 访客登录
 window.loginAsGuest = async function() {
-  playClickSound();
+  // 播放音效（如果存在）
+  try {
+    if (typeof playClickSound === 'function') {
+      playClickSound();
+    }
+  } catch (e) {
+    console.log('音效播放失败，但不影响登录:', e);
+  }
   
   console.log('=== 访客登录开始 ===');
   console.log('API_BASE:', API_BASE);
@@ -1243,7 +1250,7 @@ window.loginAsGuest = async function() {
     console.error('=== 访客登录错误 ===');
     console.error('错误详情:', error);
     console.error('错误堆栈:', error.stack);
-    alert('连接服务器失败：' + error.message + '\n\n请检查:\n1. 网络连接是否正常\n2. 后端服务是否运行');
+    alert('连接服务器失败：' + error.message + '\n\n请检查:\n1. 网络连接是否正常\n2. 后端服务是否运行\n3. 按 F12 查看控制台详情');
   }
 };
 
