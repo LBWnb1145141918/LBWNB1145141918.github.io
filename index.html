@@ -1138,11 +1138,11 @@ SCIPNET v5.2.1 | 加密：AES-256 | 延迟：12ms | 运行时间：<span id="run
 
 <script>
 // ==================== 用户登录系统 ====================
-// 本地测试使用
-// const API_BASE = 'http://localhost:3000/api';
+// 本地测试使用（推荐）
+const API_BASE = 'http://localhost:3000/api';
 
-// 部署到 Vercel 后使用
-const API_BASE = 'https://scp-terminal-backend.vercel.app/api';
+// 部署到 Railway 后使用
+// const API_BASE = 'https://your-railway-app.up.railway.app/api';
 let currentUser = null;
 let isGuest = false;
 
