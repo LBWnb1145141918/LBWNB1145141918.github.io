@@ -1,4 +1,124 @@
-<!DOCTYPE html>
+<!-- ... existing code ... -->
+
+<!-- 播放/暂停按钮 -->
+<button onclick="toggleMusic()" style="position:fixed;bottom:20px;right:20px;padding:10px 20px;background:#222;color:#fff;border:none;border-radius:5px;cursor:pointer;" id="musicBtn">
+  🔇 深渊之声已关闭
+</button>
+
+<script>
+  // 初始化音乐状态
+  const music = document.getElementById('bgMusic');
+  const musicBtn = document.getElementById('musicBtn');
+  
+  // 点击按钮切换播放状态
+  function toggleMusic() {
+    if (music.muted || music.paused) {
+      music.muted = false;
+      music.play().then(() => {
+        musicBtn.innerHTML = '🔊 深渊之声已开启';
+      }).catch(err => {
+        console.log('播放失败:', err);
+        musicBtn.innerHTML = '⚠️ 无法播放';
+      });
+    } else {
+      music.pause();
+      musicBtn.innerHTML = '🔇 深渊之声已关闭';
+    }
+  }
+  
+  // 页面加载时尝试自动播放（部分浏览器可能需要用户交互）
+  window.addEventListener('load', () => {
+    music.play().then(() => {
+      musicBtn.innerHTML = '🔊 深渊之声已开启';
+    }).catch(() => {
+      musicBtn.innerHTML = '🔇 深渊之声已关闭';
+    });
+  });
+</script>
+
+<!-- ... existing code ... -->
+
+<div class="recharge-custom">
+<label for="custom-amount">任意充值：¥</label>
+<input type="number" id="custom-amount" placeholder="请输入充值金额" min="1">
+</div>
+<button class="recharge-btn" onclick="handleRecharge()">确认充值</button>
+
+<!-- ... existing code ... -->
+
+<div class="form-row">
+<div class="form-label">姓名 / Name：</div>
+<input type="text" class="form-input" style="background:transparent;border:none;color:#ffffff;width:100%;outline:none;">
+</div>
+<div class="form-row">
+<div class="form-label">性别 / Gender：</div>
+<input type="text" class="form-input" style="background:transparent;border:none;color:#ffffff;width:100%;outline:none;">
+</div>
+<div class="form-row">
+<div class="form-label">出生日期 / DOB：</div>
+<input type="date" class="form-input" style="background:transparent;border:none;color:#ffffff;width:100%;outline:none;">
+</div>
+<div class="form-row">
+<div class="form-label">国籍 / Nationality：</div>
+<input type="text" class="form-input" style="background:transparent;border:none;color:#ffffff;width:100%;outline:none;">
+</div>
+<div class="form-row">
+<div class="form-label">学历 / Education：</div>
+<input type="text" class="form-input" style="background:transparent;border:none;color:#ffffff;width:100%;outline:none;">
+</div>
+<div class="form-row">
+<div class="form-label">院校 / Alma mater：</div>
+<input type="text" class="form-input" style="background:transparent;border:none;color:#ffffff;width:100%;outline:none;">
+</div>
+<div class="form-row">
+<div class="form-label">联系电话 / Phone：</div>
+<input type="tel" class="form-input" style="background:transparent;border:none;color:#ffffff;width:100%;outline:none;">
+</div>
+<div class="form-row">
+<div class="form-label">电子邮箱 / Email：</div>
+<input type="email" class="form-input" style="background:transparent;border:none;color:#ffffff;width:100%;outline:none;">
+</div>
+
+<!-- ... existing code ... -->
+
+<script>
+// ... existing code ...
+
+// 充值选项点击效果
+const rechargeOptions = document.querySelectorAll('.recharge-option');
+rechargeOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        rechargeOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+    });
+});
+
+// 充值处理函数
+function handleRecharge() {
+    const activeOption = document.querySelector('.recharge-option.active');
+    const customAmount = document.getElementById('custom-amount').value;
+    
+    let amount = '';
+    if (activeOption) {
+        amount = activeOption.dataset.amount;
+    } else if (customAmount) {
+        amount = customAmount;
+    }
+    
+    if (amount) {
+        alert(`正在处理充值 ¥${amount}...\n\n这是一个演示界面，实际充值功能需要接入支付系统。`);
+    } else {
+        alert('请选择充值金额或输入自定义金额！');
+    }
+}
+
+setInterval(() => {
+    const cursor = document.getElementById('cursor');
+    if (cursor) cursor.style.opacity = cursor.style.opacity === '0' ? '1' : '0';
+}, 500);
+</script>
+
+<!-- ... existing code ... --><!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
