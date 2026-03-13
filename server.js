@@ -165,8 +165,14 @@ app.get('/auth/steam/return', passport.authenticate('steam', {
 
 // 访客登录
 app.post('/api/auth/guest', express.json(), (req, res) => {
+  console.log('=== 收到访客登录请求 ===');
+  console.log('请求体:', req.body);
+  
   const guestName = req.body.guestName || `访客_${Math.random().toString(36).substr(2, 9)}`;
   const guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+  console.log('生成的访客 ID:', guestId);
+  console.log('访客昵称:', guestName);
 
   db.run(`
     INSERT INTO guest_users (guestId, displayName)
@@ -179,6 +185,8 @@ app.post('/api/auth/guest', express.json(), (req, res) => {
 
     req.session.guestId = guestId;
     req.session.guestName = guestName;
+
+    console.log('访客登录成功，Session 已设置');
 
     res.json({
       success: true,
