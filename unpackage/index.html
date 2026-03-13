@@ -82,40 +82,36 @@
 <!-- ... existing code ... -->
 
 <script>
-// ... existing code ...
-
-// 充值选项点击效果
-const rechargeOptions = document.querySelectorAll('.recharge-option');
-rechargeOptions.forEach(option => {
-    option.addEventListener('click', () => {
-        rechargeOptions.forEach(opt => opt.classList.remove('active'));
-        option.classList.add('active');
+// 页面加载完成后执行
+window.addEventListener('DOMContentLoaded', () => {
+    // 充值选项点击效果
+    const rechargeOptions = document.querySelectorAll('.recharge-option');
+    rechargeOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            rechargeOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+        });
     });
+
+    // 充值处理函数
+    window.handleRecharge = function() {
+        const activeOption = document.querySelector('.recharge-option.active');
+        const customAmount = document.getElementById('custom-amount').value;
+        
+        let amount = '';
+        if (activeOption) {
+            amount = activeOption.dataset.amount;
+        } else if (customAmount) {
+            amount = customAmount;
+        }
+        
+        if (amount) {
+            alert(`正在处理充值 ¥${amount}...\n\n这是一个演示界面，实际充值功能需要接入支付系统。`);
+        } else {
+            alert('请选择充值金额或输入自定义金额！');
+        }
+    }
 });
-
-// 充值处理函数
-function handleRecharge() {
-    const activeOption = document.querySelector('.recharge-option.active');
-    const customAmount = document.getElementById('custom-amount').value;
-    
-    let amount = '';
-    if (activeOption) {
-        amount = activeOption.dataset.amount;
-    } else if (customAmount) {
-        amount = customAmount;
-    }
-    
-    if (amount) {
-        alert(`正在处理充值 ¥${amount}...\n\n这是一个演示界面，实际充值功能需要接入支付系统。`);
-    } else {
-        alert('请选择充值金额或输入自定义金额！');
-    }
-}
-
-setInterval(() => {
-    const cursor = document.getElementById('cursor');
-    if (cursor) cursor.style.opacity = cursor.style.opacity === '0' ? '1' : '0';
-}, 500);
 </script>
 
 <!-- ... existing code ... --><!DOCTYPE html>
@@ -711,15 +707,7 @@ allMenuItems.forEach(item => {
     });
 });
 
-// 充值选项点击效果
-const rechargeOptions = document.querySelectorAll('.recharge-option');
-rechargeOptions.forEach(option => {
-    option.addEventListener('click', () => {
-        rechargeOptions.forEach(opt => opt.classList.remove('active'));
-        option.classList.add('active');
-    });
-});
-
+// 光标闪烁效果
 setInterval(() => {
     const cursor = document.getElementById('cursor');
     if (cursor) cursor.style.opacity = cursor.style.opacity === '0' ? '1' : '0';

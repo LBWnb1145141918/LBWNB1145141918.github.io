@@ -36,12 +36,19 @@ if %filesize% equ 0 (
     echo 📝 检测到更改，正在添加...
     git add .
     
-    for /f "tokens=2 delims==" %%i in ('wmic os get localdatetime /value') do set "dt=%%i"
-    set "YEAR=%dt:~0,4%"
-    set "MONTH=%dt:~4,2%"
-    set "DAY=%dt:~6,2%"
-    set "HOUR=%dt:~8,2%"
-    set "MIN=%dt:~10,2%"
+    REM 获取当前时间
+    for /f "tokens=2 delims==" %%i in ('wmic os get localdatetime /value 2^>nul') do set "dt=%%i"
+    if defined dt (
+        set "YEAR=%dt:~0,4%"
+        set "MONTH=%dt:~4,2%"
+        set "DAY=%dt:~6,2%"
+        set "HOUR=%dt:~8,2%"
+        set "MIN=%dt:~10,2%"
+    ) else (
+        REM 如果 wmic 不可用，使用 date 和 time 命令
+        for /f "tokens=1-3 delims=/-" %%a in ('date /t') do set "YEAR=%%c" & set "MONTH=%%b" & set "DAY=%%a"
+        for /f "tokens=1-2 delims=:" %%a in ('time /t') do set "HOUR=%%a" & set "MIN=%%b"
+    )
     
     set "commitMsg=自动部署：%YEAR%-%MONTH%-%DAY% %HOUR%:%MIN%"
     echo 💾 提交更改...
