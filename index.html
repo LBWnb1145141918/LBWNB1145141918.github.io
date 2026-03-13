@@ -1210,7 +1210,7 @@ window.checkLoginStatus = async function() {
 // Steam 登录
 window.loginWithSteam = function() {
   playClickSound();
-  window.location.href = 'http://localhost:3000/api/auth/steam';
+  window.location.href = `${API_BASE}/auth/steam`;
 };
 
 // 访客登录
