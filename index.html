@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCIPNET终端V2 - SITE-119</title>
+<title>SCIPNET 终端 V2 - SITE-119</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Consolas','Courier New',monospace;}
 body{background-color:#091219;background-image:linear-gradient(rgba(0,15,20,0.8)1px,transparent 1px),linear-gradient(90deg,rgba(0,15,20,0.8)1px,transparent 1px);background-size:25px 25px;color:#00ffff;overflow-y:hidden;height:100vh;position:relative;}
@@ -435,12 +436,13 @@ a{color:#00ffcc;text-decoration:underline;}
   你的浏览器不支持音频播放，请更换浏览器！
 </audio>
 
-<!-- 新增：点击音效音频标签 -->
+<!-- 点击音效音频标签（已移除，文件不存在） -->
+<!-- 
 <audio id="clickSound" preload="auto">
-  <!-- 深海风格音效 -->
   <source src="music/click-sound.mp3" type="audio/mpeg">
   你的浏览器不支持音频播放！
 </audio>
+-->
 
 <!-- 音乐控制按钮（置顶显示） -->
 <button id="musicBtn" onclick="toggleMusicPanel()">
@@ -1395,28 +1397,10 @@ function toggleRole(element, originalTitle, newTitle, nickname, siteName) {
   playClickSound();
 }
 
-// 新增：播放点击音效函数
+// 新增：播放点击音效函数（已移除，文件不存在）
 function playClickSound() {
-  const clickSound = document.getElementById('clickSound');
-  if (!clickSound) {
-    console.log('音效元素不存在');
-    return;
-  }
-  
-  // 重置音频播放位置，确保每次点击都能播放
-  clickSound.currentTime = 0;
-  
-  // 播放音效
-  clickSound.play().then(() => {
-    console.log('音效播放成功');
-  }).catch(err => {
-    // 处理浏览器自动播放策略限制
-    console.log("音效播放需要用户交互授权：", err);
-    // 如果是因为未加载，尝试重新加载
-    if (clickSound.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
-      console.warn('音效文件未找到，请检查 music/click-sound.mp3 是否存在');
-    }
-  });
+  // 音效文件不存在，直接返回
+  // console.log('音效播放（已移除）');
 }
 
 // 新增：创建点击特效
