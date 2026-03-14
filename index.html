@@ -708,8 +708,39 @@ a{color:#00ffcc;text-decoration:underline;}
   <p style="color:#00ccff; font-style:italic; text-align:center; margin-top:30px;">
     投稿成功后需等待管理员审核 | 当前投稿数：<span id="submissionCount">0</span>
   </p>
+  
+  <!-- 管理员审核入口（隐藏功能） -->
+  <div style="margin-top:50px; padding-top:20px; border-top:1px solid #008888;">
+    <button onclick="showAdminPanel()" style="padding:8px 20px; background-color:rgba(255,100,0,0.2); border:1px solid #ff6600; color:#ff6600; border-radius:4px; cursor:pointer; font-size:14px;">
+      🔐 管理员审核入口
+    </button>
+  </div>
 </div>
 <div class="back-menu" data-target="main">【返回主菜单】</div>
+
+<!-- 管理员审核面板（模态框） -->
+<div id="adminPanel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.95); z-index:10001; overflow-y:auto;">
+  <div style="max-width:1000px; margin:0 auto; padding:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+      <h2 style="color:#ff6600; font-size:28px;">🔐 投稿审核管理系统</h2>
+      <button onclick="closeAdminPanel()" style="padding:10px 20px; background-color:rgba(255,0,0,0.3); border:1px solid #ff0000; color:#ff0000; border-radius:4px; cursor:pointer; font-weight:bold;">✖ 关闭</button>
+    </div>
+    
+    <div style="margin:20px 0; padding:15px; background-color:rgba(255,100,0,0.1); border-left:4px solid #ff6600;">
+      <p style="color:#ffcc00; margin:5px 0;"><strong>⚠️ 管理员操作说明：</strong></p>
+      <ul style="color:#ffaa00; margin:10px 0; padding-left:20px;">
+        <li>点击"✅ 通过"按钮审核通过投稿</li>
+        <li>点击"❌ 拒绝"按钮拒绝投稿</li>
+        <li>点击"🗑️ 删除"按钮删除投稿</li>
+        <li>审核通过的投稿才会公开展示</li>
+      </ul>
+    </div>
+    
+    <div id="adminSubmissionsList" style="margin-top:30px;">
+      <!-- 动态加载所有投稿（包含待审核） -->
+    </div>
+  </div>
+</div>
 
 <!-- ==================== 违规记录查询（玩家自查） ==================== -->
 <div class="content-block" id="violation-record">
@@ -1588,6 +1619,129 @@ function renderSubmissions() {
     item.innerHTML = html;
     list.appendChild(item);
   });
+}
+
+// ==================== 管理员审核功能 ====================
+function showAdminPanel() {
+  // 简单的密码验证（可以改为更复杂的验证）
+  const password = prompt('请输入管理员密码：');
+  if (password !== 'admin123') { // 默认密码
+    alert('密码错误！');
+    return;
+  }
+  
+  const panel = document.getElementById('adminPanel');
+  panel.style.display = 'block';
+  renderAdminSubmissions();
+}
+
+function closeAdminPanel() {
+  const panel = document.getElementById('adminPanel');
+  panel.style.display = 'none';
+}
+
+function renderAdminSubmissions() {
+  const list = document.getElementById('adminSubmissionsList');
+  if (!list) return;
+  
+  list.innerHTML = '';
+  
+  if (submissions.length === 0) {
+    list.innerHTML = '<p style="color:#888; text-align:center; padding:40px 0;">暂无任何投稿</p>';
+    return;
+  }
+  
+  // 渲染所有投稿（包含待审核）
+  submissions.forEach((sub, index) => {
+    const typeEmoji = {
+      'story': '📖',
+      'art': '🎨',
+      'scp': '📁',
+      'other': '🔧'
+    };
+    
+    const typeNames = {
+      'story': '故事/文章',
+      'art': '艺术作品',
+      'scp': 'SCP 文档',
+      'other': '其他'
+    };
+    
+    const item = document.createElement('div');
+    item.style.cssText = 'background-color:rgba(50,50,50,0.3); border:2px solid #ff6600; padding:20px; margin:20px 0; border-radius:8px;';
+    
+    let html = `
+      <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:15px;">
+        <div style="flex:1;">
+          <h4 style="color:#ffcc00; margin:5px 0; font-size:18px;">${typeEmoji[sub.type]} ${sub.title}</h4>
+          <p style="color:#888; font-size:14px; margin:5px 0;">
+            作者：<span style="color:#ffaa00;">${sub.author}</span> | 
+            类型：${typeNames[sub.type]} | 
+            时间：${sub.date}
+          </p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          ${sub.status === 'pending' ? `
+            <button onclick="approveSubmission(${index})" style="padding:8px 15px; background-color:rgba(0,255,0,0.2); border:1px solid #00ff00; color:#00ff00; border-radius:4px; cursor:pointer; font-weight:bold;">
+              ✅ 通过
+            </button>
+            <button onclick="rejectSubmission(${index})" style="padding:8px 15px; background-color:rgba(255,0,0,0.2); border:1px solid #ff0000; color:#ff0000; border-radius:4px; cursor:pointer; font-weight:bold;">
+              ❌ 拒绝
+            </button>
+          ` : `
+            <span style="padding:6px 12px; background-color:rgba(0,255,204,0.1); border:1px solid #00ffcc; color:#00ffcc; font-size:14px; border-radius:4px;">
+              ${sub.status === 'approved' ? '✅ 已通过' : '❌ 未通过'}
+            </span>
+          `}
+          <button onclick="deleteSubmission(${index})" style="padding:8px 15px; background-color:rgba(255,100,0,0.2); border:1px solid #ff6600; color:#ff6600; border-radius:4px; cursor:pointer; font-weight:bold;">
+            🗑️ 删除
+          </button>
+        </div>
+      </div>
+      <div style="background-color:rgba(0,0,0,0.3); padding:15px; border-radius:4px; color:#e0e0e0; line-height:1.6; white-space:pre-wrap; margin:15px 0; max-height:300px; overflow-y:auto;">${sub.content}</div>
+    `;
+    
+    if (sub.image) {
+      html += `
+        <div style="margin-top:15px;">
+          <img src="${sub.image}" alt="投稿图片" style="max-width:400px; max-height:300px; border-radius:4px; cursor:pointer;" onclick="viewImage('${sub.image}')">
+        </div>
+      `;
+    }
+    
+    item.innerHTML = html;
+    list.appendChild(item);
+  });
+}
+
+function approveSubmission(index) {
+  if (!confirm('确认通过此投稿吗？')) return;
+  
+  submissions[index].status = 'approved';
+  saveSubmissions();
+  renderAdminSubmissions();
+  renderSubmissions(); // 更新前台显示
+  alert('投稿已通过！');
+}
+
+function rejectSubmission(index) {
+  if (!confirm('确认拒绝此投稿吗？')) return;
+  
+  submissions[index].status = 'rejected';
+  saveSubmissions();
+  renderAdminSubmissions();
+  renderSubmissions(); // 更新前台显示
+  alert('投稿已拒绝！');
+}
+
+function deleteSubmission(index) {
+  if (!confirm('确认删除此投稿吗？此操作不可恢复！')) return;
+  
+  submissions.splice(index, 1);
+  saveSubmissions();
+  renderAdminSubmissions();
+  renderSubmissions(); // 更新前台显示
+  alert('投稿已删除！');
 }
 
 function seekMusic(value) {
