@@ -427,6 +427,8 @@ a{color:#00ffcc;text-decoration:underline;}
 <div class="menu-item" data-target="violation-record" style="color:#00ff00; font-weight:bold; text-shadow:0 0 6px #ff0000;">• 违规记录查询</div>
 <!-- 新增：深渊社区菜单 -->
 <div class="menu-item" data-target="community">• 深渊社区</div>
+<!-- 新增：深渊投稿菜单 -->
+<div class="menu-item" data-target="submission">• 深渊投稿</div>
 
 <!-- 右下角 ERROR 菜单 -->
 <div style="text-align: right; margin-top: 60px;">
@@ -634,6 +636,80 @@ a{color:#00ffcc;text-decoration:underline;}
   
   <div class="back-menu" data-target="main">【返回主菜单】</div>
 </div>
+
+<!-- ==================== 深渊投稿 ==================== -->
+<div class="content-block" id="submission">
+  <p><span class="prompt">></span> 欢迎来到深渊投稿系统</p>
+  <p><span class="prompt">></span> 档案等级：<span style="color:#00ffcc; font-weight:bold;">公开</span> | 访问权限：所有人员</p>
+  <hr style="border-color:#008888;">
+  
+  <div style="margin:20px 0;">
+    <h3 style="color:#00ffff; margin:15px 0;">📝 投稿说明</h3>
+    <div style="background-color:rgba(0,40,50,0.3); border-left:4px solid #00ffcc; padding:15px; margin:15px 0;">
+      <p style="color:#00ffcc; margin:5px 0;"><strong>📋 投稿规则：</strong></p>
+      <ul style="color:#00ccff; margin:10px 0; padding-left:20px;">
+        <li>可以投稿文字、图片、故事、艺术作品等内容</li>
+        <li>投稿内容需符合 SCP 基金会世界观</li>
+        <li>禁止投稿违规、敏感或不适当的内容</li>
+        <li>所有投稿将由管理员审核后展示</li>
+        <li>投稿时请注明笔名或匿名</li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- 投稿表单 -->
+  <div style="margin:30px 0;">
+    <h3 style="color:#00ffff; margin:15px 0;">✍️ 发表投稿</h3>
+    
+    <div style="margin:15px 0;">
+      <label style="color:#00ffcc; display:block; margin-bottom:8px;">📝 标题：</label>
+      <input type="text" id="submissionTitle" placeholder="请输入投稿标题" style="width:100%; padding:12px; background-color:rgba(0,30,40,0.5); border:1px solid #008888; color:#00ffcc; border-radius:4px;">
+    </div>
+    
+    <div style="margin:15px 0;">
+      <label style="color:#00ffcc; display:block; margin-bottom:8px;">👤 笔名：</label>
+      <input type="text" id="submissionAuthor" placeholder="请输入笔名（留名则匿名）" style="width:100%; padding:12px; background-color:rgba(0,30,40,0.5); border:1px solid #008888; color:#00ffcc; border-radius:4px;">
+    </div>
+    
+    <div style="margin:15px 0;">
+      <label style="color:#00ffcc; display:block; margin-bottom:8px;">📄 类型：</label>
+      <select id="submissionType" style="width:100%; padding:12px; background-color:rgba(0,30,40,0.5); border:1px solid #008888; color:#00ffcc; border-radius:4px;">
+        <option value="story">📖 故事/文章</option>
+        <option value="art">🎨 艺术作品</option>
+        <option value="scp">📁 SCP 文档</option>
+        <option value="other">🔧 其他</option>
+      </select>
+    </div>
+    
+    <div style="margin:15px 0;">
+      <label style="color:#00ffcc; display:block; margin-bottom:8px;">📝 内容：</label>
+      <textarea id="submissionContent" placeholder="请输入投稿内容..." rows="8" style="width:100%; padding:12px; background-color:rgba(0,30,40,0.5); border:1px solid #008888; color:#00ffcc; border-radius:4px; resize:vertical;"></textarea>
+    </div>
+    
+    <div style="margin:15px 0;">
+      <label style="color:#00ffcc; display:block; margin-bottom:8px;">🖼️ 图片（可选）：</label>
+      <input type="file" id="submissionImage" accept="image/*" style="padding:10px; background-color:rgba(0,30,40,0.5); border:1px solid #008888; color:#00ffcc; border-radius:4px; width:100%;">
+      <p style="color:#008888; font-size:12px; margin-top:5px;">支持 JPG、PNG、GIF 格式，最大 5MB</p>
+    </div>
+    
+    <button onclick="submitPost()" style="margin-top:20px; padding:12px 30px; background-color:rgba(0,255,204,0.2); border:1px solid #00ffcc; color:#00ffcc; border-radius:4px; cursor:pointer; font-size:16px; font-weight:bold; width:100%;">
+      📤 提交投稿
+    </button>
+  </div>
+  
+  <!-- 投稿列表 -->
+  <div style="margin:40px 0;">
+    <h3 style="color:#00ffff; margin:15px 0;">📚 最新投稿</h3>
+    <div id="submissionsList" style="margin-top:20px;">
+      <!-- 动态加载投稿内容 -->
+    </div>
+  </div>
+  
+  <p style="color:#00ccff; font-style:italic; text-align:center; margin-top:30px;">
+    投稿成功后需等待管理员审核 | 当前投稿数：<span id="submissionCount">0</span>
+  </p>
+</div>
+<div class="back-menu" data-target="main">【返回主菜单】</div>
 
 <!-- ==================== 违规记录查询（玩家自查） ==================== -->
 <div class="content-block" id="violation-record">
@@ -1353,9 +1429,165 @@ function changeVolume(value) {
     isMusicMuted = false;
     music.muted = false;
   }
-  
   updateMusicStatus();
   playClickSound();
+}
+
+// ==================== 深渊投稿功能 ====================
+let submissions = [];
+
+// 页面加载时加载投稿列表
+document.addEventListener('DOMContentLoaded', function() {
+  loadSubmissions();
+});
+
+function loadSubmissions() {
+  // 从 localStorage 加载投稿数据
+  const saved = localStorage.getItem('abyssSubmissions');
+  if (saved) {
+    submissions = JSON.parse(saved);
+  }
+  renderSubmissions();
+}
+
+function saveSubmissions() {
+  // 保存到 localStorage
+  localStorage.setItem('abyssSubmissions', JSON.stringify(submissions));
+}
+
+function submitPost() {
+  // 获取表单数据
+  const title = document.getElementById('submissionTitle').value.trim();
+  const author = document.getElementById('submissionAuthor').value.trim() || '匿名';
+  const type = document.getElementById('submissionType').value;
+  const content = document.getElementById('submissionContent').value.trim();
+  const imageInput = document.getElementById('submissionImage');
+  
+  // 验证必填字段
+  if (!title) {
+    alert('请输入标题！');
+    return;
+  }
+  
+  if (!content) {
+    alert('请输入内容！');
+    return;
+  }
+  
+  // 创建投稿对象
+  const submission = {
+    id: Date.now(),
+    title: title,
+    author: author,
+    type: type,
+    content: content,
+    image: null,
+    date: new Date().toLocaleString('zh-CN'),
+    status: 'pending' // pending, approved, rejected
+  };
+  
+  // 处理图片
+  if (imageInput.files && imageInput.files[0]) {
+    const file = imageInput.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+      alert('图片大小不能超过 5MB！');
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      submission.image = e.target.result;
+      completeSubmission(submission);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    completeSubmission(submission);
+  }
+}
+
+function completeSubmission(submission) {
+  // 添加到列表
+  submissions.unshift(submission); // 添加到最前面
+  saveSubmissions();
+  
+  // 清空表单
+  document.getElementById('submissionTitle').value = '';
+  document.getElementById('submissionAuthor').value = '';
+  document.getElementById('submissionContent').value = '';
+  document.getElementById('submissionImage').value = '';
+  
+  // 重新渲染列表
+  renderSubmissions();
+  
+  // 显示成功提示
+  alert('投稿成功！您的投稿已提交，等待管理员审核。');
+  console.log('投稿成功:', submission);
+}
+
+function renderSubmissions() {
+  const list = document.getElementById('submissionsList');
+  const count = document.getElementById('submissionCount');
+  
+  if (!list) return;
+  
+  // 更新计数
+  count.textContent = submissions.length;
+  
+  // 清空列表
+  list.innerHTML = '';
+  
+  if (submissions.length === 0) {
+    list.innerHTML = '<p style="color:#008888; text-align:center; padding:40px 0;">暂无投稿，成为第一个投稿的人吧！</p>';
+    return;
+  }
+  
+  // 渲染投稿列表
+  submissions.forEach(sub => {
+    const typeEmoji = {
+      'story': '📖',
+      'art': '🎨',
+      'scp': '📁',
+      'other': '🔧'
+    };
+    
+    const typeNames = {
+      'story': '故事/文章',
+      'art': '艺术作品',
+      'scp': 'SCP 文档',
+      'other': '其他'
+    };
+    
+    const item = document.createElement('div');
+    item.style.cssText = 'background-color:rgba(0,30,40,0.3); border:1px solid #008888; padding:15px; margin:15px 0; border-radius:8px;';
+    
+    let html = `
+      <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:10px;">
+        <div>
+          <h4 style="color:#00ffcc; margin:5px 0; font-size:18px;">${typeEmoji[sub.type]} ${sub.title}</h4>
+          <p style="color:#008888; font-size:14px; margin:5px 0;">
+            作者：<span style="color:#00ccff;">${sub.author}</span> | 
+            类型：${typeNames[sub.type]} | 
+            时间：${sub.date}
+          </p>
+        </div>
+        <span style="padding:4px 10px; background-color:rgba(0,255,204,0.1); border:1px solid #00ffcc; color:#00ffcc; font-size:12px; border-radius:4px;">
+          ${sub.status === 'pending' ? '⏳ 待审核' : sub.status === 'approved' ? '✅ 已通过' : '❌ 未通过'}
+        </span>
+      </div>
+      <div style="color:#e0e0e0; line-height:1.6; white-space:pre-wrap; margin:10px 0;">${sub.content}</div>
+    `;
+    
+    if (sub.image) {
+      html += `
+        <div style="margin-top:15px;">
+          <img src="${sub.image}" alt="投稿图片" style="max-width:100%; max-height:400px; border-radius:4px; cursor:pointer;" onclick="viewImage('${sub.image}')">
+        </div>
+      `;
+    }
+    
+    item.innerHTML = html;
+    list.appendChild(item);
+  });
 }
 
 function seekMusic(value) {
