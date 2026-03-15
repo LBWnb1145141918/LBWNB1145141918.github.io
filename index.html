@@ -632,7 +632,8 @@ a{color:#00ffcc;text-decoration:underline;}
     </div>
   </div>
   
-  <p style="color:#00ccff; font-style:italic; margin-top:15px;">提示：聊天数据仅保存在本地，刷新页面后不会保留</p>
+  <p style="color:#00ff00; font-weight:bold; margin-top:15px;">🌐 在线聊天模式 - 所有用户消息实时同步</p>
+  <p style="color:#00ccff; font-style:italic; margin-top:5px;">提示：聊天数据保存在服务器，刷新页面仍会保留</p>
   
   <div class="back-menu" data-target="main">【返回主菜单】</div>
 </div>
@@ -705,8 +706,11 @@ a{color:#00ffcc;text-decoration:underline;}
     </div>
   </div>
   
-  <p style="color:#00ccff; font-style:italic; text-align:center; margin-top:30px;">
-    投稿成功后需等待管理员审核 | 当前投稿数：<span id="submissionCount">0</span>
+  <p style="color:#00ff00; font-weight:bold; text-align:center; margin-top:30px;">
+    🌐 在线投稿模式 - 投稿数据实时同步到服务器
+  </p>
+  <p style="color:#00ccff; font-style:italic; text-align:center; margin-top:10px;">
+    当前投稿数：<span id="submissionCount">0</span> | 所有用户可见
   </p>
   
   <!-- 管理员审核入口（隐藏功能） -->
@@ -2163,6 +2167,263 @@ document.addEventListener('DOMContentLoaded', function() {
         div.textContent = text;
         return div.innerHTML;
     }
+});
+
+// ==================== 在线聊天和投稿功能 ====================
+let ws = null;
+let currentUserId = null;
+let currentUsername = null;
+
+// 初始化 WebSocket 连接
+function initWebSocket() {
+    // 检测环境并选择 WebSocket 地址
+    let wsUrl;
+    
+    if (window.location.hostname.includes('railway.app') || window.location.hostname.includes('vercel.app')) {
+        // 生产环境 - 使用 wss://
+        wsUrl = `wss://${window.location.hostname}`;
+        console.log('生产环境 WebSocket:', wsUrl);
+    } else {
+        // 本地开发 - 使用 ws://
+        wsUrl = 'ws://localhost:3000';
+        console.log('本地环境 WebSocket:', wsUrl);
+    }
+    
+    try {
+        ws = new WebSocket(wsUrl);
+        
+        ws.onopen = function() {
+            console.log('WebSocket 连接成功');
+            // 加载历史消息
+            loadChatHistory();
+        };
+        
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === 'history') {
+                // 加载历史消息
+                displayChatMessages(data.messages);
+            } else if (data.type === 'chat') {
+                // 接收新消息
+                addChatMessage(data.username, data.message, data.emoji, data.createdAt);
+            }
+        };
+        
+        ws.onclose = function() {
+            console.log('WebSocket 连接关闭，尝试重新连接...');
+            // 3 秒后重连
+            setTimeout(initWebSocket, 3000);
+        };
+        
+        ws.onerror = function(error) {
+            console.error('WebSocket 错误:', error);
+        };
+    } catch (e) {
+        console.log('WebSocket 不可用，使用 HTTP 模式:', e);
+        // 使用 HTTP 模式
+        loadChatHistoryHTTP();
+    }
+}
+
+// 获取当前用户信息
+function getCurrentUserInfo() {
+    // 尝试从 sessionStorage 获取
+    const stored = sessionStorage.getItem('userInfo');
+    if (stored) {
+        const user = JSON.parse(stored);
+        currentUserId = user.guestId || 'user_' + Date.now();
+        currentUsername = user.displayName || '深渊用户';
+        return;
+    }
+    
+    // 默认匿名用户
+    currentUserId = 'anonymous_' + Date.now();
+    currentUsername = '深渊访客';
+}
+
+// 发送消息（重写）
+function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    
+    if (!message) {
+        playErrorSound();
+        return;
+    }
+    
+    // 获取用户信息
+    if (!currentUserId) {
+        getCurrentUserInfo();
+    }
+    
+    const emoji = window.lastSelectedEmoji || '';
+    
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        // WebSocket 模式
+        ws.send(JSON.stringify({
+            type: 'chat',
+            userId: currentUserId,
+            username: currentUsername,
+            message: message,
+            emoji: emoji
+        }));
+    } else {
+        // HTTP 模式
+        fetch('/api/chat/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUserId,
+                username: currentUsername,
+                message: message,
+                emoji: emoji
+            })
+        }).then(res => res.json())
+          .then(data => {
+              if (data.success) {
+                  // 手动添加到聊天窗口
+                  addChatMessage(currentUsername, message, emoji, new Date().toISOString());
+              }
+          })
+          .catch(err => console.error('发送失败:', err));
+    }
+    
+    input.value = '';
+    playClickSound();
+}
+
+// 加载聊天历史（WebSocket 模式）
+function loadChatHistory() {
+    // WebSocket 会自动推送历史消息
+}
+
+// 加载聊天历史（HTTP 模式）
+function loadChatHistoryHTTP() {
+    fetch('/api/chat/history')
+        .then(res => res.json())
+        .then(messages => {
+            displayChatMessages(messages);
+        })
+        .catch(err => console.error('加载历史失败:', err));
+}
+
+// 显示聊天消息
+function displayChatMessages(messages) {
+    const chatDiv = document.getElementById('chatMessages');
+    if (!chatDiv) return;
+    
+    // 清空现有消息（除了欢迎消息）
+    const welcomeMsg = chatDiv.querySelector('div:first-child');
+    chatDiv.innerHTML = '';
+    if (welcomeMsg) {
+        chatDiv.appendChild(welcomeMsg);
+    }
+    
+    messages.forEach(msg => {
+        addChatMessage(msg.username, msg.message, msg.emoji, msg.createdAt);
+    });
+    
+    // 滚动到底部
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+// 添加聊天消息到界面
+function addChatMessage(username, message, emoji, timestamp) {
+    const chatDiv = document.getElementById('chatMessages');
+    if (!chatDiv) return;
+    
+    const msgDiv = document.createElement('div');
+    msgDiv.style.marginBottom = '10px';
+    msgDiv.style.padding = '8px';
+    msgDiv.style.backgroundColor = 'rgba(0,50,60,0.3)';
+    msgDiv.style.borderRadius = '4px';
+    msgDiv.style.borderLeft = '3px solid #00ffcc';
+    msgDiv.style.animation = 'pulse 0.3s ease-in-out';
+    
+    const time = new Date(timestamp).toLocaleTimeString('zh-CN');
+    msgDiv.innerHTML = `
+        <span style="color:#00ffff; font-weight:bold;">[${escapeHtml(username)}]</span>
+        <span style="color:#e0e0e0; margin-left:8px;">${escapeHtml(message)}</span>
+        ${emoji ? `<span style="font-size:18px; margin-left:5px;">${emoji}</span>` : ''}
+        <span style="color:#008888; font-size:12px; margin-left:10px;">${time}</span>
+    `;
+    
+    chatDiv.appendChild(msgDiv);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+// 初始化投稿功能
+function initSubmissions() {
+    loadSubmissions();
+}
+
+// 加载投稿列表
+function loadSubmissions() {
+    fetch('/api/submissions')
+        .then(res => res.json())
+        .then(submissions => {
+            const countSpan = document.getElementById('submissionCount');
+            if (countSpan) {
+                countSpan.textContent = submissions.length;
+            }
+        })
+        .catch(err => console.error('加载投稿失败:', err));
+}
+
+// 提交投稿（重写）
+function submitToServer() {
+    const title = document.getElementById('submissionTitle').value.trim();
+    const content = document.getElementById('submissionContent').value.trim();
+    const type = document.getElementById('submissionType').value;
+    
+    if (!title || !content) {
+        alert('请填写标题和内容');
+        playErrorSound();
+        return;
+    }
+    
+    // 获取用户信息
+    if (!currentUserId) {
+        getCurrentUserInfo();
+    }
+    
+    const submissionData = {
+        title: title,
+        author: currentUsername,
+        type: type,
+        content: content
+    };
+    
+    fetch('/api/submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submissionData)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert('投稿成功！');
+            document.getElementById('submissionTitle').value = '';
+            document.getElementById('submissionContent').value = '';
+            loadSubmissions();
+        } else {
+            alert('投稿失败：' + data.error);
+        }
+    })
+    .catch(err => {
+        alert('投稿失败：' + err.message);
+    });
+    
+    playClickSound();
+}
+
+// 页面加载时初始化
+window.addEventListener('DOMContentLoaded', function() {
+    console.log('页面加载完成，初始化在线功能...');
+    getCurrentUserInfo();
+    initWebSocket();
+    initSubmissions();
 });
 </script>
 
