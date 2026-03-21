@@ -508,7 +508,7 @@ a{color:#00ffcc;text-decoration:underline;}
 </div>
 
 <!-- 基地人员数据库 -->
-<div class="content-block" id="personnel-database" style="display:none;">
+<div class="content-block" id="personnel-database">
 <p><span class="prompt">></span> 正在加载 119 号基地人员数据库...</p>
 <p><span class="prompt">></span> 档案等级：公开 | 访问权限：所有人员</p>
 <hr>
@@ -2053,8 +2053,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const allMenuItems = document.querySelectorAll('.menu-item, .back-menu, .scp-item, .recharge-option, .recharge-btn');
     const contentBlocks = document.querySelectorAll('.content-block');
 
+    console.log('初始化：菜单项数量', allMenuItems.length);
+    console.log('初始化：内容块数量', contentBlocks.length);
+
     allMenuItems.forEach(item => {
         item.addEventListener('click', (e) => {
+            console.log('菜单点击：目标 ID =', item.dataset.target);
+            
             // 播放点击音效
             playClickSound();
             
@@ -2077,15 +2082,20 @@ document.addEventListener('DOMContentLoaded', function() {
             // 给当前点击的 menu-item 添加 active（如果是 menu-item）
             if (item.classList.contains('menu-item')) item.classList.add('active');
             
-            // 获取目标ID并切换内容
+            // 获取目标 ID 并切换内容
             const targetId = item.dataset.target;
             if (targetId) {
+                console.log('切换内容：移除所有 active');
                 contentBlocks.forEach(block => block.classList.remove('active'));
                 const targetBlock = document.getElementById(targetId);
+                console.log('目标元素:', targetBlock);
                 if (targetBlock) {
+                    console.log('添加 active 到:', targetId);
                     targetBlock.classList.add('active');
                     // 滚动到内容顶部
                     document.querySelector('.terminal-content').scrollTop = 0;
+                } else {
+                    console.error('未找到目标元素:', targetId);
                 }
             }
         });
