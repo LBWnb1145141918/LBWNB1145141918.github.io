@@ -2267,10 +2267,14 @@ function initWebSocket() {
         // 生产环境 - 使用 wss://
         wsUrl = `wss://${window.location.hostname}`;
         console.log('生产环境 WebSocket:', wsUrl);
-    } else {
+    } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         // 本地开发 - 使用 ws://
         wsUrl = 'ws://localhost:3000';
         console.log('本地环境 WebSocket:', wsUrl);
+    } else {
+        // 静态部署（如 GitHub Pages）- 不连接 WebSocket
+        console.log('静态部署环境，跳过 WebSocket 连接');
+        return;
     }
     
     try {
