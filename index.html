@@ -2170,17 +2170,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 创建点击特效
             createClickEffect(e.clientX, e.clientY);
-            
-            // 如果是第一次用户交互，尝试播放背景音乐
-            const bgMusic = document.getElementById('bgMusic');
-            if (bgMusic && bgMusic.paused && isMusicMuted === false) {
-                bgMusic.play().then(() => {
-                    console.log('用户交互后音乐开始播放');
-                    updateMusicStatus();
-                }).catch(err => {
-                    console.log('播放失败:', err);
-                });
-            }
                 
             // 移除所有 menu-item 的 active 状态
             document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
