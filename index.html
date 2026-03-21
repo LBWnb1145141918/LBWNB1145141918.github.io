@@ -419,7 +419,7 @@ a{color:#00ffcc;text-decoration:underline;}
 <div class="menu-item" data-target="scp-list">• SITE-119 SCP档案</div>
 <div class="menu-item" data-target="engineering">• SITE-119 工程资料报表</div>
 <div class="menu-item" data-target="norbert">• Norbert 计划 // 起源</div>
-<div class="menu-item" data-target="main">• 119号基地人员数据库</div>
+<div class="menu-item" data-target="personnel-database">• 119 号基地人员数据库</div>
 <div class="menu-item" data-target="entry">• SITE-119 入职申报</div>
 <!-- 新增：Site-119 已故人员名单菜单 -->
 <div class="menu-item" data-target="deceased-list">• Site-119已故人员名单</div>
@@ -503,6 +503,88 @@ a{color:#00ffcc;text-decoration:underline;}
 
 <hr>
 <p style="color:#00ccff; font-style:italic;">注：点击任意职位卡片查看详细信息 | 所有人员均按基金会规程完成登记备案</p>
+</div>
+
+<!-- 基地人员数据库 -->
+<div class="content-block" id="personnel-database" style="display:none;">
+<p><span class="prompt">></span> 正在加载 119 号基地人员数据库...</p>
+<p><span class="prompt">></span> 档案等级：公开 | 访问权限：所有人员</p>
+<hr>
+<div class="scp-doc">
+<h2 style="color:#00ffff; margin:10px 0;">🏛️ 119 号基地人员数据库</h2>
+<p style="margin:8px 0;"><strong>更新时间：</strong><span id="personnelUpdateTime">2026-03-15</span></p>
+<p style="margin:8px 0;"><strong>部门数量：</strong>6 个核心部门</p>
+<hr>
+
+<!-- 安保部门 -->
+<div style="margin:25px 0; padding:20px; background:rgba(255,50,50,0.1); border-left:4px solid #ff3333; border-radius:6px;">
+  <h3 style="color:#ff6666; margin-bottom:15px; font-size:20px;">🛡️ 安保部门</h3>
+  <div style="padding:15px; background:rgba(0,0,0,0.2); border-radius:4px;">
+    <p style="color:#ffcccc; line-height:1.8; margin-bottom:15px;">
+      <strong style="color:#ff9999;">SITE-119 安保力量</strong> - 保全部门单位下属一个特殊武器操作小组、一个特护医疗小组、一个组的常规安保力量，由设施安保主管带领，下属 1~2 个中尉作为中层指挥。
+    </p>
+    <p style="color:#ff9999; font-size:14px; margin:10px 0;">
+      <strong>主要任务：</strong>维护设施收容、保护科研人员人身安全、保护设施不被敌对势力渗透
+    </p>
+  </div>
+</div>
+
+<!-- 科研部门 -->
+<div style="margin:25px 0; padding:20px; background:rgba(50,150,255,0.1); border-left:4px solid #3399ff; border-radius:6px;">
+  <h3 style="color:#66b3ff; margin-bottom:15px; font-size:20px;">🔬 科研部门</h3>
+  <div style="padding:15px; background:rgba(0,0,0,0.2); border-radius:4px;">
+    <p style="color:#cce6ff; line-height:1.8; margin-bottom:15px;">
+      <strong style="color:#99ccff;">SITE-119 科研部门</strong> - 下属高级科研人员、科研助理，由梅纳德博士带领研究
+    </p>
+    <p style="color:#99ccff; font-size:14px; margin:10px 0;">
+      <strong>主要任务：</strong>完成对异常的实验，以便于更好的收容
+    </p>
+  </div>
+</div>
+
+<!-- 工程部门 -->
+<div style="margin:25px 0; padding:20px; background:rgba(255,180,0,0.1); border-left:4px solid #ffb700; border-radius:6px;">
+  <h3 style="color:#ffcc33; margin-bottom:15px; font-size:20px;">⚙️ 工程部门</h3>
+  <div style="padding:15px; background:rgba(0,0,0,0.2); border-radius:4px;">
+    <p style="color:#ffe699; line-height:1.8; margin-bottom:15px;">
+      <strong style="color:#ffd966;">SITE-119 工程部门</strong> - 由高级工程师、工程师组成，由工程主管带领
+    </p>
+    <p style="color:#ffd966; font-size:14px; margin:10px 0;">
+      <strong>主要任务：</strong>设施内反应堆维护，设施收容措施维护，紧急状况抢修反应堆等
+    </p>
+  </div>
+</div>
+
+<!-- 行政单位 -->
+<div style="margin:25px 0; padding:20px; background:rgba(180,50,255,0.1); border-left:4px solid #b432ff; border-radius:6px;">
+  <h3 style="color:#cc66ff; margin-bottom:15px; font-size:20px;">📋 行政单位</h3>
+  <div style="padding:15px; background:rgba(0,0,0,0.2); border-radius:4px;">
+    <p style="color:#e6ccff; line-height:1.8; margin-bottom:15px;">
+      <strong style="color:#d999ff;">设施内的行政指挥单位</strong> - 由设施主管、调度员、歇火部专员组成，他们独立于其他部门
+    </p>
+    <div style="margin-top:15px; padding:12px; background:rgba(255,255,255,0.05); border-radius:4px; border-left:3px solid #cc66ff;">
+      <p style="color:#d999ff; font-size:14px; margin:8px 0;"><strong>特殊职责：</strong></p>
+      <ul style="color:#e6ccff; margin:8px 0; padding-left:25px; line-height:1.8;">
+        <li><strong>设施主管：</strong>调度整个设施，在危机时刻可以呼叫海之戟机动特遣队</li>
+        <li><strong>调度员：</strong>可以呼叫应急小组，并在呼叫完成的紧急状况下获取一把大口径狙击枪，协助收容</li>
+        <li><strong>歇火部专员：</strong>负责调查安保部门或科研部门成员或工程部成员的失职失误及时止损，并给予其惩罚</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 海之戟机动特遣队 -->
+<div style="margin:25px 0; padding:20px; background:rgba(0,150,200,0.1); border-left:4px solid #0099cc; border-radius:6px;">
+  <h3 style="color:#33b3cc; margin-bottom:15px; font-size:20px;">🌊 海之戟机动特遣队</h3>
+  <div style="padding:15px; background:rgba(0,0,0,0.2); border-radius:4px;">
+    <p style="color:#99e6ff; line-height:1.8;">
+      <strong style="color:#66d9e6;">一支专门在深海内行动的机动特遣队</strong> - 在危急情况下由设施主管呼叫协助设施内安保单位结束危机情况
+    </p>
+  </div>
+</div>
+
+<hr>
+<p style="color:#00ccff; font-style:italic; margin-top:25px;">注：所有部门均按基金会 Site-119 标准规程配置 | 数据库版本：V2.0</p>
 </div>
 <div class="back-menu" data-target="main">【返回主菜单】</div>
 </div>
