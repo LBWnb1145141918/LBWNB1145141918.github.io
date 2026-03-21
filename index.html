@@ -2445,14 +2445,28 @@ function initSubmissions() {
 // 加载投稿列表
 function loadSubmissions() {
     fetch('/api/submissions')
-        .then(res => res.json())
-        .then(submissions => {
+        .then(res => {
+            if (!res.ok) {
+                // API 不存在（静态部署），使用本地存储
+                return { local: true, data: [] };
+            }
+            return res.json();
+        })
+        .then(result => {
+            const submissions = result.local ? result.data : result;
             const countSpan = document.getElementById('submissionCount');
             if (countSpan) {
                 countSpan.textContent = submissions.length;
             }
         })
-        .catch(err => console.error('加载投稿失败:', err));
+        .catch(err => {
+            console.log('投稿功能：使用本地模式（无后端 API）');
+            // API 不可用，使用本地存储
+            const countSpan = document.getElementById('submissionCount');
+            if (countSpan) {
+                countSpan.textContent = '0';
+            }
+        });
 }
 
 // 提交投稿（重写）
