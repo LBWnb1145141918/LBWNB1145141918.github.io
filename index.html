@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -425,8 +425,6 @@ a{color:#00ffcc;text-decoration:underline;}
 <div class="menu-item" data-target="deceased-list">• Site-119已故人员名单</div>
 <!-- 新增：违规记录查询（玩家自查版） -->
 <div class="menu-item" data-target="violation-record" style="color:#00ff00; font-weight:bold; text-shadow:0 0 6px #ff0000;">• 违规记录查询</div>
-<!-- 新增：深渊社区菜单 -->
-<div class="menu-item" data-target="community">• 深渊社区</div>
 <!-- 新增：深渊投稿菜单 -->
 <div class="menu-item" data-target="submission">• 深渊投稿</div>
 
@@ -1819,7 +1817,7 @@ function renderSubmissions() {
 function showAdminPanel() {
   // 简单的密码验证（可以改为更复杂的验证）
   const password = prompt('请输入管理员密码：');
-  if (password !== 'admin123') { // 默认密码
+  if (password !== 'LBWNB114514') { // 默认密码
     alert('密码错误！');
     return;
   }
